@@ -505,4 +505,10 @@ y = Y / (X + Y + Z)
 ```text
 CMYK ↔ LAB ↔ RGB
 ```
+
+## Веб-приложение
+
+Рабочая версия лабораторной:
+https://k1m1kkk.github.io/Programming-of-computer-graphics/
+
 >>>>>>> f93a145 (Lab 1: color models, variant 10)
