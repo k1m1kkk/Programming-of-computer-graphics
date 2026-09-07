@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ЛР1 — Цветовые модели, вариант 10</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="app-header">
+      <div>
+        <h1>Цветовые модели</h1>
+        <p>Вариант 10: CMYK ↔ LAB ↔ RGB</p>
+      </div>
+      <div class="color-preview" aria-label="Текущий цвет">
+        <div id="hero-color" class="preview-swatch"></div>
+        <strong id="hero-hex">#4287F5</strong>
+      </div>
+    </header>
+
+    <section class="settings-panel card" aria-label="Настройки преобразования">
+      <div class="setting-group">
+        <label for="illuminant">Освещение</label>
+        <select id="illuminant">
+          <option value="D65">D65</option>
+          <option value="D50">D50</option>
+          <option value="E">E</option>
+        </select>
+      </div>
+
+      <div class="setting-group">
+        <label for="cmyk-algorithm">CMYK</label>
+        <select id="cmyk-algorithm">
+          <option value="gcr">GCR</option>
+          <option value="ucr">UCR</option>
+        </select>
+      </div>
+
+      <div class="setting-group" id="ucr-setting" hidden>
+        <label for="ucr-threshold">Порог UCR: <span id="ucr-threshold-value">50%</span></label>
+        <input id="ucr-threshold" type="range" min="0" max="90" step="1" value="50">
+      </div>
+
+      <div class="setting-group">
+        <label for="gamut-strategy">Выход за RGB</label>
+        <select id="gamut-strategy">
+          <option value="clipping">Clipping</option>
+          <option value="scaling">Scaling</option>
+        </select>
+      </div>
+    </section>
+
+    <div id="warning" class="warning" hidden></div>
+
+    <section id="models" class="models-grid"></section>
+  </main>
+
+  <script src="src/model/math.js"></script>
+  <script src="src/model/illuminants.js"></script>
+  <script src="src/model/gamut.js"></script>
+  <script src="src/model/rgb-xyz.js"></script>
+  <script src="src/model/xyz-lab.js"></script>
+  <script src="src/model/rgb-cmyk.js"></script>
+  <script src="src/model/color-model.js"></script>
+  <script src="src/viewmodel/color-controller.js"></script>
+  <script src="src/view/color-view.js"></script>
+  <script src="src/main.js"></script>
+</body>
+</html>
