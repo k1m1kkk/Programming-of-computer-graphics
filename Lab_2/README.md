@@ -310,4 +310,6 @@ lab2_image_metadata_10A/
 └── tests/
 ```
 
+## Ссылка на веб-приложение
 
+https://k1m1kkk.github.io/Programming-of-computer-graphics/Lab_2/
