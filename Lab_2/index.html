@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Лабораторная работа №2 — метаданные изображений</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main class="page-shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Лабораторная работа №2</p>
+        <h1>Метаданные изображений</h1>
+        <p class="subtitle">Ручное чтение JPG, GIF, TIFF, BMP, PNG и PCX без библиотек метаданных.</p>
+      </div>
+    </header>
+
+    <section class="scan-card" aria-labelledby="scanTitle">
+      <div class="scan-card__top">
+        <div>
+          <h2 id="scanTitle">Выберите папку с изображениями</h2>
+          <p>Можно выбрать до 100&nbsp;000 файлов. Обрабатываются только поддерживаемые форматы.</p>
+        </div>
+        <div class="scan-actions">
+          <label class="button button-primary" for="folderInput">Выбрать папку</label>
+          <input id="folderInput" class="visually-hidden" type="file" webkitdirectory directory multiple>
+          <label class="button button-secondary" for="fileInput">Выбрать файлы</label>
+          <input id="fileInput" class="visually-hidden" type="file" multiple accept=".jpg,.jpeg,.gif,.tif,.tiff,.bmp,.png,.pcx">
+          <button id="cancelButton" class="button button-danger hidden" type="button">Остановить</button>
+        </div>
+      </div>
+
+      <div id="dropZone" class="drop-zone" tabindex="0">
+        <strong>Или перетащите изображения сюда</strong>
+        <span>Папку удобнее выбирать кнопкой выше.</span>
+      </div>
+
+      <div id="progressPanel" class="progress-panel hidden" aria-live="polite">
+        <div class="progress-line">
+          <span id="progressText">Подготовка…</span>
+          <span id="progressPercent">0%</span>
+        </div>
+        <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <div id="progressBar" class="progress-bar"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="summarySection" class="summary-grid hidden" aria-label="Сводка">
+      <article class="summary-card">
+        <span>Найдено</span>
+        <strong id="summaryTotal">0</strong>
+      </article>
+      <article class="summary-card">
+        <span>Обработано</span>
+        <strong id="summaryProcessed">0</strong>
+      </article>
+      <article class="summary-card">
+        <span>Повреждено</span>
+        <strong id="summaryCorrupt">0</strong>
+      </article>
+      <article class="summary-card">
+        <span>Время</span>
+        <strong id="summaryTime">0 с</strong>
+      </article>
+      <article class="summary-card">
+        <span>Прочитано данных</span>
+        <strong id="summaryRead">0 Б</strong>
+      </article>
+    </section>
+
+    <section id="resultsSection" class="results-card hidden" aria-labelledby="resultsTitle">
+      <div class="results-toolbar">
+        <div>
+          <h2 id="resultsTitle">Результаты</h2>
+          <p id="resultCount">0 файлов</p>
+        </div>
+        <div class="filters">
+          <label>
+            <span>Поиск</span>
+            <input id="searchInput" type="search" placeholder="Имя файла">
+          </label>
+          <label>
+            <span>Формат</span>
+            <select id="formatFilter">
+              <option value="all">Все</option>
+              <option value="JPEG">JPG</option>
+              <option value="GIF">GIF</option>
+              <option value="TIFF">TIFF</option>
+              <option value="BMP">BMP</option>
+              <option value="PNG">PNG</option>
+              <option value="PCX">PCX</option>
+            </select>
+          </label>
+          <label>
+            <span>Статус</span>
+            <select id="statusFilter">
+              <option value="all">Все</option>
+              <option value="ok">Корректные</option>
+              <option value="warning">С предупреждением</option>
+              <option value="corrupt">Поврежденные</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="table-shell">
+        <div class="table-header" aria-hidden="true">
+          <span>Статус</span>
+          <span>Имя файла</span>
+          <span>Формат</span>
+          <span>Размер</span>
+          <span>Разрешение</span>
+          <span>Глубина</span>
+          <span>Сжатие</span>
+          <span>Размер файла</span>
+          <span></span>
+        </div>
+        <div id="tableViewport" class="table-viewport" role="table" aria-label="Метаданные изображений">
+          <div id="tableSpacer" class="table-spacer">
+            <div id="tableRows" class="table-rows"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="detailsDialog" class="dialog">
+    <div class="dialog-header">
+      <div>
+        <p class="eyebrow">Подробная информация</p>
+        <h2 id="dialogTitle">Файл</h2>
+      </div>
+      <button id="dialogClose" class="icon-button" type="button" aria-label="Закрыть">×</button>
+    </div>
+    <div class="dialog-content">
+      <div id="previewWrap" class="preview-wrap hidden">
+        <img id="previewImage" alt="Предпросмотр изображения">
+      </div>
+      <dl id="detailsList" class="details-list"></dl>
+      <div id="diagnosticsBlock" class="diagnostics-block hidden"></div>
+    </div>
+  </dialog>
+
+  <dialog id="aboutDialog" class="dialog dialog-small">
+    <div class="dialog-header">
+      <div>
+        <p class="eyebrow">Архитектура</p>
+        <h2>Как устроен проект</h2>
+      </div>
+      <button id="aboutClose" class="icon-button" type="button" aria-label="Закрыть">×</button>
+    </div>
+    <div class="dialog-content prose">
+      <p><strong>Presentation Layer</strong> отвечает только за интерфейс, таблицу, фильтры и прогресс.</p>
+      <p><strong>Core / Business Logic Layer</strong> управляет очередью файлов и пулом Worker-потоков.</p>
+      <p><strong>Data / Parsing Layer</strong> вручную читает байты и заголовки форматов. Библиотеки метаданных не используются.</p>
+      <p>Для больших папок применяется частичное чтение через <code>Blob.slice()</code>, а таблица виртуализирована и не создаёт десятки тысяч DOM-строк одновременно.</p>
+    </div>
+  </dialog>
+
+  <script type="module" src="./src/presentation/app.js"></script>
+</body>
+</html>

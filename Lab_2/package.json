@@ -1,0 +1,8 @@
+{
+  "name": "lab2-image-metadata-10a",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node tests/run-tests.mjs"
+  }
+}
