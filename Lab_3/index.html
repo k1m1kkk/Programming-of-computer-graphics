@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Лабораторная работа 3 — вариант 10</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <div class="eyebrow">Лабораторная работа 3</div>
+      <h1>Обработка цифровых изображений · вариант 10</h1>
+    </div>
+    <div class="top-actions">
+      <label class="button secondary file-button">
+        Загрузить изображение
+        <input id="fileInput" type="file" accept="image/*">
+      </label>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="sidebar card">
+      <h2>Метод обработки</h2>
+      <label class="field">
+        <span>Раздел</span>
+        <select id="categorySelect">
+          <option value="global">Глобальная пороговая обработка</option>
+          <option value="adaptive">Адаптивная пороговая обработка</option>
+          <option value="rank">Нелинейные фильтры</option>
+        </select>
+      </label>
+
+      <div id="methodControls"></div>
+
+      <button id="processBtn" class="button primary" disabled>Обработать</button>
+      <button id="compareBtn" class="button secondary full" disabled>Сравнить два глобальных метода</button>
+
+      <div class="progress-wrap" aria-live="polite">
+        <div class="progress-track"><div id="progressBar" class="progress-bar"></div></div>
+        <span id="progressText">Готово</span>
+      </div>
+
+      <div class="separator"></div>
+      <h2>Тестовые изображения</h2>
+      <div class="test-grid">
+        <button class="test-image" data-src="assets/tests/global_balanced.png">Глобальный порог 1</button>
+        <button class="test-image" data-src="assets/tests/global_unbalanced.png">Глобальный порог 2</button>
+        <button class="test-image" data-src="assets/tests/uneven_illumination.png">Неравномерное освещение</button>
+        <button class="test-image" data-src="assets/tests/salt_pepper_noise.png">Импульсный шум</button>
+      </div>
+    </aside>
+
+    <section class="workspace">
+      <div class="canvas-grid">
+        <article class="card image-card">
+          <div class="card-title"><h2>Исходное изображение</h2><span id="sourceInfo">—</span></div>
+          <div class="canvas-shell"><canvas id="sourceCanvas"></canvas></div>
+        </article>
+        <article class="card image-card">
+          <div class="card-title"><h2>Результат</h2><span id="resultInfo">—</span></div>
+          <div class="canvas-shell"><canvas id="resultCanvas"></canvas></div>
+        </article>
+        <article id="compareCard" class="card image-card hidden">
+          <div class="card-title"><h2>Второй метод</h2><span id="compareInfo">—</span></div>
+          <div class="canvas-shell"><canvas id="compareCanvas"></canvas></div>
+        </article>
+      </div>
+
+      <article class="card histogram-card">
+        <div class="card-title"><h2>Гистограммы</h2><span>0–255</span></div>
+        <div class="histogram-grid">
+          <div><span class="panel-label">До</span><canvas id="histBefore" width="700" height="220"></canvas></div>
+          <div><span class="panel-label">После</span><canvas id="histAfter" width="700" height="220"></canvas></div>
+        </div>
+      </article>
+
+      <article class="card result-card">
+        <div class="result-grid">
+          <div><span>Метод</span><strong id="metricMethod">—</strong></div>
+          <div><span>Время</span><strong id="metricTime">—</strong></div>
+          <div><span>Параметры</span><strong id="metricParams">—</strong></div>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <script src="js/core.js"></script>
+  <script src="js/threshold.js"></script>
+  <script src="js/rank-filters.js"></script>
+  <script src="js/parallel.js"></script>
+  <script src="js/test-images.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
