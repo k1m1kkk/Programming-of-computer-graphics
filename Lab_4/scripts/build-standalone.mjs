@@ -1,0 +1,24 @@
+import { readFile, writeFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
+import { resolve, dirname } from 'node:path';
+
+const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const read = (name) => readFile(resolve(root, name), 'utf8');
+const clean = (source) => source.replace(/^import .*?;\s*$/gm, '').replace(/\bexport (?=(?:class|const|function|async function)\b)/g, '');
+const baseFiles = ['src/IRasterTarget.js', 'src/VirtualGrid.js', 'src/RasterEngine.js'];
+const uiFiles = ['src/GridPainter.js', 'src/checks.js', 'src/main.js'];
+const workerFiles = ['src/Benchmark.js', 'src/benchmark.worker.js'];
+const sources = await Promise.all([...baseFiles, ...uiFiles, ...workerFiles].map(read));
+const lookup = Object.fromEntries([...baseFiles, ...uiFiles, ...workerFiles].map((path, i) => [path, clean(sources[i])]));
+const workerSource = [...baseFiles, ...workerFiles].map((name) => lookup[name]).join('\n\n');
+const sourceMain = lookup['src/main.js'];
+const originalWorker = "new Worker(new URL('./benchmark.worker.js', import.meta.url), { type: 'module' })";
+if (!sourceMain.includes(originalWorker)) throw new Error('Worker code no longer matches the expected replacement');
+const mainWithWorker = sourceMain.replace(originalWorker, 'createLocalBenchmarkWorker()');
+const prelude = `const __benchmarkWorkerSource = ${JSON.stringify(workerSource)};\nfunction createLocalBenchmarkWorker() {\n  const url = URL.createObjectURL(new Blob([__benchmarkWorkerSource], { type: 'text/javascript' }));\n  try { return new Worker(url); } finally { setTimeout(() => URL.revokeObjectURL(url), 30000); }\n}\n`;
+const js = ['"use strict";', ...baseFiles.map((name) => lookup[name]), ...uiFiles.slice(0, 2).map((name) => lookup[name]), lookup['src/Benchmark.js'], prelude, mainWithWorker].join('\n\n');
+const template = await read('template.html');
+if (!template.includes('/* APP_STYLES */') || !template.includes('/* APP_SCRIPT */')) throw new Error('Missing HTML placeholders');
+const html = template.replace('/* APP_STYLES */', await read('styles.css')).replace('/* APP_SCRIPT */', js);
+await writeFile(resolve(root, 'index.html'), html);
+console.log(`Created standalone index.html (${(Buffer.byteLength(html) / 1024).toFixed(1)} KiB)`);

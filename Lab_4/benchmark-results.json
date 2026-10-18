@@ -1,0 +1,188 @@
+{
+  "meta": {
+    "generatedAt": "2026-10-18T15:42:25.088Z",
+    "clock": "performance.now()",
+    "repetitions": 3,
+    "statistic": "median",
+    "seedLines": "0x4a21bcb1",
+    "seedCircles": "0x5022aa61",
+    "grid": "401x401",
+    "lineRange": "8..160",
+    "geometry": "Sun: all rays originate at (0,0); octants cycle 0..7; directions, lengths and slopes are seeded random.",
+    "radiusRange": "1..120",
+    "methodology": "Dataset and Clear() are outside the timer. SetPixel() and full raster generation are inside. No DOM or canvas rendering is timed.",
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/144.0.0.0 Safari/537.36"
+  },
+  "countResults": [
+    {
+      "count": 5000,
+      "step": 7.599999999860302,
+      "dda": 6.599999999860302,
+      "bresenham": 4.800000000046566,
+      "wu": 19.300000000046566,
+      "castle": 46.300000000046566
+    },
+    {
+      "count": 10000,
+      "step": 13.699999999953434,
+      "dda": 12.300000000046566,
+      "bresenham": 8,
+      "wu": 32.89999999990687,
+      "castle": 84.19999999995343
+    },
+    {
+      "count": 25000,
+      "step": 33.60000000009313,
+      "dda": 29.699999999953434,
+      "bresenham": 19.300000000046566,
+      "wu": 85.89999999990687,
+      "castle": 221.5
+    },
+    {
+      "count": 50000,
+      "step": 66.80000000004657,
+      "dda": 59.60000000009313,
+      "bresenham": 35.799999999813735,
+      "wu": 161.30000000004657,
+      "castle": 423.69999999995343
+    },
+    {
+      "count": 100000,
+      "step": 131.80000000004657,
+      "step_raw": {
+        "ms": 131.80000000004657,
+        "measurements": [
+          135.69999999995343,
+          131,
+          131.80000000004657
+        ],
+        "pixels": 100630,
+        "calls": 8489603,
+        "clipped": 0
+      },
+      "dda": 117.9000000001397,
+      "dda_raw": {
+        "ms": 117.9000000001397,
+        "measurements": [
+          117.9000000001397,
+          119.4000000001397,
+          114.80000000004657
+        ],
+        "pixels": 100630,
+        "calls": 8489603,
+        "clipped": 0
+      },
+      "bresenham": 79.5,
+      "bresenham_raw": {
+        "ms": 79.5,
+        "measurements": [
+          82.89999999990687,
+          79.5,
+          78.4000000001397
+        ],
+        "pixels": 100630,
+        "calls": 8489603,
+        "clipped": 0
+      },
+      "wu": 322.19999999995343,
+      "wu_raw": {
+        "ms": 322.19999999995343,
+        "measurements": [
+          323.10000000009313,
+          316.89999999990687,
+          322.19999999995343
+        ],
+        "pixels": 101923,
+        "calls": 16615153,
+        "clipped": 0
+      },
+      "castle": 928.1999999999534,
+      "castle_raw": {
+        "ms": 928.1999999999534,
+        "measurements": [
+          1013.4000000001397,
+          907.0999999998603,
+          928.1999999999534
+        ],
+        "pixels": 100630,
+        "calls": 8489603,
+        "clipped": 0
+      }
+    }
+  ],
+  "lengthResults": [
+    {
+      "length": 12,
+      "step": 3.4000000001396984,
+      "dda": 1.8999999999068677,
+      "bresenham": 1.1999999999534339,
+      "wu": 4.5,
+      "castle": 7.5
+    },
+    {
+      "length": 24,
+      "step": 3.7999999998137355,
+      "dda": 3.699999999953434,
+      "bresenham": 2.6000000000931323,
+      "wu": 9.199999999953434,
+      "castle": 16
+    },
+    {
+      "length": 48,
+      "step": 8.100000000093132,
+      "dda": 6.699999999953434,
+      "bresenham": 4.7999999998137355,
+      "wu": 20.200000000186265,
+      "castle": 38.5999999998603
+    },
+    {
+      "length": 96,
+      "step": 16,
+      "dda": 14.899999999906868,
+      "bresenham": 10.100000000093132,
+      "wu": 37.799999999813735,
+      "castle": 80.0999999998603
+    },
+    {
+      "length": 160,
+      "step": 26.9000000001397,
+      "dda": 24.5,
+      "bresenham": 14.400000000139698,
+      "wu": 64.9000000001397,
+      "castle": 137.30000000004657
+    }
+  ],
+  "circleResults": [
+    {
+      "count": 2500,
+      "circle": 10.199999999953434
+    },
+    {
+      "count": 5000,
+      "circle": 21.300000000046566
+    },
+    {
+      "count": 12500,
+      "circle": 46.799999999813735
+    },
+    {
+      "count": 25000,
+      "circle": 83.0999999998603
+    },
+    {
+      "count": 50000,
+      "circle": 164.39999999990687,
+      "circle_raw": {
+        "ms": 164.39999999990687,
+        "measurements": [
+          164.39999999990687,
+          165.89999999990687,
+          163.30000000004657
+        ],
+        "pixels": 55408,
+        "calls": 17454912,
+        "clipped": 0
+      }
+    }
+  ]
+}

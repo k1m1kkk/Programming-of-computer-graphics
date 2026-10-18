@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+
+<html lang="ru">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<meta content="#101b35" name="theme-color"/>
+<title>RasterLab 04 — Базовые растровые алгоритмы · 10А</title>
+
+<style id="app-css">/* APP_STYLES */</style></head>
+<body>
+<div class="shell"><header class="app-header"><div class="brand"><span class="brand-icon">▦</span><div><strong>RasterLab</strong><small>Лабораторная № 4 · группа 10А</small></div></div><nav aria-label="Разделы приложения" class="navigation"><button aria-controls="panel-demo" aria-selected="true" class="nav-item active" data-tab="demo" type="button">Растеризация</button><button aria-controls="panel-benchmark" aria-selected="false" class="nav-item" data-tab="benchmark" type="button">Бенчмарк</button><button aria-controls="panel-theory" aria-selected="false" class="nav-item" data-tab="theory" type="button">Теория</button><button aria-controls="panel-checks" aria-selected="false" class="nav-item" data-tab="checks" type="button">Проверки</button></nav></header>
+
+<div class="main-shell">
+
+<main>
+<section class="panel active" id="panel-demo">
+<div class="page-intro"><h1>Базовые растровые алгоритмы</h1><p>Выберите алгоритм, укажите координаты и посмотрите, как он заполняет виртуальный растр.</p></div>
+<div class="workspace">
+<section class="controls paper">
+<div class="section-title"><h2>Параметры построения</h2></div>
+<label class="field"><span>Алгоритм</span><select id="algorithm"><option value="step">Пошаговый алгоритм</option><option value="dda">ЦДА (DDA)</option><option selected="" value="bresenham">Брезенхем · отрезок</option><option value="wu">Ву · сглаживание</option><option value="castle">Кастл–Питвей · отрезок</option><option value="circle">Брезенхем · окружность</option><option value="ellipse">Питвей · эллипс / дуга</option><option value="parabola">Питвей · парабола</option><option value="hyperbola">Питвей · гипербола</option></select></label>
+<div id="line-fields">
+<div class="field-label">Начальная точка <span>A (x₀, y₀)</span></div>
+<div class="two-col"><label class="field"><span>X₀</span><input id="x0" step="1" type="number" value="-14"/></label><label class="field"><span>Y₀</span><input id="y0" step="1" type="number" value="-8"/></label></div>
+<div class="field-label">Конечная точка <span>B (x₁, y₁)</span></div>
+<div class="two-col"><label class="field"><span>X₁</span><input id="x1" step="1" type="number" value="18"/></label><label class="field"><span>Y₁</span><input id="y1" step="1" type="number" value="11"/></label></div>
+<button class="subtle-button" id="swap" type="button">⇄ Поменять точки местами</button>
+</div>
+<div hidden="" id="curve-fields">
+<div class="field-label">Центр фигуры <span>C (x, y)</span></div>
+<div class="two-col"><label class="field"><span>Центр X</span><input id="cx" step="1" type="number" value="0"/></label><label class="field"><span>Центр Y</span><input id="cy" step="1" type="number" value="0"/></label></div>
+<div class="field" id="radius-field"><span>Радиус</span><input id="radius" min="0" step="1" type="number" value="16"/></div>
+<div hidden="" id="ellipse-fields">
+<div class="two-col"><label class="field"><span>Полуось Rx</span><input id="rx" min="0" step="1" type="number" value="23"/></label><label class="field"><span>Полуось Ry</span><input id="ry" min="0" step="1" type="number" value="13"/></label></div>
+<label class="field"><span>Дуга</span><select id="arc"><option value="full">Полный эллипс</option><option value="top">Верхняя половина</option><option value="bottom">Нижняя половина</option><option value="left">Левая половина</option><option value="right">Правая половина</option><option value="q1">I четверть</option><option value="q2">II четверть</option><option value="q3">III четверть</option><option value="q4">IV четверть</option></select></label>
+</div>
+<div hidden="" id="parabola-fields">
+<div class="two-col"><label class="field"><span>Полуширина X</span><input id="parabola-extent" min="0" step="1" type="number" value="24"/></label><label class="field"><span>Параметр p</span><input id="parabola-scale" min="1" step="1" type="number" value="16"/></label></div>
+<label class="field"><span>Открытие</span><select id="parabola-direction"><option value="up">Вверх</option><option value="down">Вниз</option></select></label>
+</div>
+<div hidden="" id="hyperbola-fields">
+<div class="two-col"><label class="field"><span>Полуось a</span><input id="hyperbola-a" min="1" step="1" type="number" value="9"/></label><label class="field"><span>Полуось b</span><input id="hyperbola-b" min="1" step="1" type="number" value="13"/></label></div>
+<label class="field"><span>Высота Y</span><input id="hyperbola-height" min="0" step="1" type="number" value="24"/></label>
+<label class="field"><span>Ветви</span><select id="hyperbola-branches"><option value="both">Обе ветви</option><option value="right">Правая</option><option value="left">Левая</option></select></label>
+</div>
+</div>
+<div class="error" hidden="" id="form-error" role="alert"></div>
+<button class="primary-button" id="render" type="button">▶ Построить растр</button>
+<div class="control-divider"></div>
+<div class="section-title compact"><h2>Отображение</h2></div>
+<div class="zoom-row"><span>Масштаб пикселя</span><div><button aria-label="Уменьшить масштаб" id="zoom-out" type="button">−</button><strong id="zoom-value">18 px</strong><button aria-label="Увеличить масштаб" id="zoom-in" type="button">+</button></div></div>
+<label class="check-row"><input checked="" id="show-grid" type="checkbox"/> Линии сетки</label>
+<label class="check-row"><input checked="" id="show-axes" type="checkbox"/> Оси координат</label>
+<label class="check-row"><input checked="" id="show-labels" type="checkbox"/> Подписи координат</label>
+<div class="control-divider"></div>
+<div class="section-title compact"><h2>Примеры</h2></div>
+<div class="preset-grid"><button data-preset="octants">8 октантов</button><button data-preset="horizontal">Горизонталь</button><button data-preset="vertical">Вертикаль</button><button data-preset="point">Одна точка</button><button data-preset="circle">Окружность</button><button data-preset="ellipse">Эллипс</button><button data-preset="parabola">Парабола</button><button data-preset="hyperbola">Гипербола</button></div>
+</section>
+<div class="visual-column">
+<section class="paper stage"><div class="stage-header"><div><h2>Дискретная координатная сетка</h2><p>Y направлена вверх. Область сетки автоматически расширяется под фигуру; (0, 0) остаётся видимым.</p></div><button class="outline-button" id="png" type="button">↓ PNG</button></div>
+<div class="canvas-viewport" id="viewport"><canvas aria-label="Дискретная сетка пикселей" id="grid-canvas" tabindex="0"></canvas></div>
+<div class="stage-footer"><span><i class="pixel-dot"></i> Закрашенные ячейки</span><span>Наведение: <b id="hover-position">—</b></span><span id="grid-dimensions">81 × 61 ячейка</span></div>
+</section>
+<section class="stat-grid"><div class="stat paper"><small>Закрашено ячеек</small><strong id="stat-pixels">0</strong><span>Уникальные пиксели</span></div><div class="stat paper"><small>Вызовов SetPixel</small><strong id="stat-calls">0</strong><span>Включая симметричные</span></div><div class="stat paper"><small>Вне видимой сетки</small><strong id="stat-clipped">0</strong><span>Пикселей отсечено UI</span></div></section>
+<section class="paper trace-section"><div class="section-title"><div><h2>Пошаговая трассировка</h2><p>SetPixel сразу записывает в виртуальный растр и сохраняет трассу для пошагового воспроизведения.</p></div><span class="muted" id="step-counter">0 / 0</span></div>
+<div class="trace-toolbar"><button class="outline-button" id="step-prev">← Назад</button><input aria-label="Шаг выполнения" id="step-range" max="0" min="0" type="range" value="0"/><button class="outline-button" id="step-next">Вперёд →</button><button class="outline-button" id="step-all">Все шаги</button></div>
+<div class="table-scroll"><table><thead><tr><th>#</th><th>Координата X</th><th>Координата Y</th><th>Интенсивность α</th><th>Статус</th></tr></thead><tbody id="trace-body"><tr><td colspan="5">Нет данных</td></tr></tbody></table></div>
+</section>
+</div>
+</div>
+</section>
+<section class="panel" id="panel-benchmark">
+<div class="page-intro"><h1>Бенчмарк производительности</h1><p>«Солнце» из 100 000 отрезков с общим центром, 50 000 окружностей и реальные графики.</p></div>
+<section class="paper benchmark-banner"><div><h2>Полный воспроизводимый бенчмарк</h2><p>100 000 случайных лучей из (0,0) во всех восьми октантах, 50 000 окружностей, растр 401 × 401, 3 повтора и медиана performance.now(). Только вычисление массива, без UI.</p><div class="benchmark-metrics"><span>100 000 <small>линий</small></span><span>50 000 <small>окружностей</small></span><span>8 / 8 <small>октантов</small></span></div></div><button class="primary-button" id="run-benchmark">▶ Запустить измерения</button></section>
+<section class="paper progress-paper" hidden="" id="progress-box"><div class="progress-title"><strong id="progress-text">Подготовка...</strong><span id="progress-value">0%</span></div><div class="progress-track"><div id="progress-fill"></div></div></section>
+<div class="benchmark-empty" id="benchmark-empty">Запустите тест, чтобы получить измеренные значения и графики. Демонстрационные числа не подставляются.</div>
+<div hidden="" id="benchmark-results"><div class="chart-grid"><section class="paper chart-card"><h2>Время / количество отрезков</h2><p>Для каждого объёма — тот же набор геометрии и одинаковый растр.</p><div id="chart-count"></div></section><section class="paper chart-card"><h2>Время / длина отрезка</h2><p>10 000 линий на каждую длину; восемь октантов.</p><div id="chart-length"></div></section></div><section class="paper chart-card"><h2>Время / количество окружностей</h2><p>Окружности разных радиусов: от 1 до 120 ячеек.</p><div id="chart-circles"></div></section><section class="paper report-card"><div><h2>Измеренные результаты</h2><p id="benchmark-info">—</p></div><div class="export-buttons"><button class="outline-button" id="export-csv">↓ CSV</button><button class="outline-button" id="export-json">↓ JSON</button></div><div class="table-scroll"><table><thead><tr><th>Алгоритм</th><th>Время теста (мс)</th><th>Примечание</th></tr></thead><tbody id="benchmark-table"></tbody></table></div><p class="footnote">Скорость зависит от процессора, браузера и JIT. Теоретическое преимущество целочисленной арифметики не гарантирует меньшего времени в JavaScript при каждом замере.</p></section></div>
+</section>
+<section class="panel" id="panel-theory"><div class="page-intro"><h1>Краткая теория</h1><p>Как устроены растровые алгоритмы, виртуальная сетка и измерение производительности.</p></div>
+<div class="theory-grid"><article class="paper theory-card"><h2>Виртуальный растр</h2><p>Все алгоритмы получают только IRasterTarget с методом <code>SetPixel(x, y, intensity)</code>. Двумерная матрица хранит числа от 0 до 1; она не знает о canvas, браузере или цветах.</p><div class="formula">col = x − minX<br/>row = y − minY<br/>screenY = (height − 1 − row) · cell</div><p>Целочисленная пара (x, y) соответствует <strong>центру одной ячейки</strong>; ячейка охватывает [x − ½, x + ½] × [y − ½, y + ½]. На canvas координата Y направлена вниз, поэтому строка инвертируется.</p></article>
+<article class="paper theory-card"><h2>ЦДА и пошаговый</h2><p>Пошаговый алгоритм подставляет очередную координату в уравнение линии. ЦДА использует приращения Δx/L и Δy/L, где L = max(|Δx|, |Δy|). Для получения пикселей нужны вещественные вычисления и округление.</p><div class="formula">xₖ = x₀ + k · Δx/L<br/>yₖ = y₀ + k · Δy/L</div></article>
+<article class="paper theory-card"><h2>Брезенхем</h2><p>Использует целочисленную ошибку выбора ближайшего пикселя. Перестановка главной оси и знаки приращений обеспечивают все 8 октантов, включая обратное направление и крутые отрезки.</p><div class="formula">d₀ = 2 · minor − major<br/>d &lt; 0 → d += 2 · minor<br/>d ≥ 0 → d += 2(minor − major)</div></article>
+<article class="paper theory-card"><h2>Ву и alpha</h2><p>Для каждого положения на главной оси распределяет непрозрачность между соседними пикселями по дробной части второстепенной координаты: интенсивности равны 1 − f и f.</p><div class="formula">f = exactY − floor(exactY)<br/>αниж = 1 − f<br/>αверх = f</div><p>Композиция поверх фона: <code>color = (1 − α) · background + α · foreground</code>. На концах с целочисленными координатами альфа равна 1.</p></article>
+<article class="paper theory-card"><h2>Окружность и конические кривые</h2><p>Окружность Брезенхема рассчитывает одну восьмую, отражая каждый пиксель в 8 симметричных позиций. Эллиптическая дуга использует целочисленный midpoint-критерий для неявной коники и отражение в 4 четверти.</p><div class="formula">F(x, y) = Ry²x² + Rx²y² − Rx²Ry²</div><p>Для дуги применяется целочисленная фильтрация по полуосям/четвертям. Отдельно доступны парабола <code>p·y=x²</code> и гипербола <code>x²/a²−y²/b²=1</code>. Midpoint-критерий вычисляется в целых числах, с переходом между ведущими осями. Проверяются вытянутые эллипсы и граничные пиксели.</p></article>
+<article class="paper theory-card"><h2>Кастл–Питвей: важное уточнение</h2><p>В учебнике БГУ (часть 2, §1.3.4) это алгоритм кодирования <strong>отрезка</strong> с помощью последовательности S/D — кода Ротштейна. Он реализован отдельно. В дополнении 10А коники связаны с именем Питвея; для эллипсов, парабол и гипербол реализованы отдельные целочисленные midpoint-алгоритмы согласно принципу метода М. Питвея (1967).</p><p>Кастл–Питвей для прямых и метод Питвея для коник — не один и тот же алгоритм; оба представлены и не подменяют друг друга.</p></article></div>
+<section class="paper methodology"><h2>Как проводится замер</h2><p>Все входные массивы координат генерируются <strong>до</strong> включения таймера. Каждый алгоритм использует <strong>одинаковые</strong> линии. Перед каждым повтором виртуальный растр очищается (очистка не учитывается), далее выполняется только алгоритм и <code>VirtualGrid.SetPixel()</code>. После выполнения записывается <code>performance.now()</code>. Берётся медиана из 3 измерений. На графиках — реальные значения, рассчитанные на устройстве пользователя.</p><p>Реализация не вызывает <code>canvas.lineTo()</code>, <code>canvas.arc()</code>, <code>stroke()</code> и другие функции рисования фигур. <code>GridPainter</code> только закрашивает квадратные ячейки в соответствии с матрицей; сетка и оси отображаются как прямоугольные полосы UI.</p></section>
+</section>
+<section class="panel" id="panel-checks"><div class="page-intro"><h1>Проверка корректности</h1><p>Автоматические тесты алгоритмов и граничных случаев.</p></div><div class="paper checks-paper"><button class="primary-button" id="run-checks">▶ Запустить проверки</button><div class="checks-summary" id="check-summary">Проверки ещё не запускались.</div><div class="check-results" id="check-results"></div><p class="footnote">Такие же проверки доступны в терминале: <code>npm test</code>. Для полного повторяемого замера: <code>npm run benchmark</code>.</p></div></section>
+</main>
+</div>
+</div>
+
+<script id="app-js">/* APP_SCRIPT */</script></body>
+</html>

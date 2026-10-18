@@ -1,0 +1,18 @@
+{
+  "name": "raster-lab-04-10a",
+  "version": "1.2.0",
+  "private": true,
+  "type": "module",
+  "description": "Static rasterization laboratory for group 10A",
+  "scripts": {
+    "start": "python3 -m http.server 8000",
+    "test": "node tests/run-tests.js && node tests/benchmark-dataset.js",
+    "benchmark": "node scripts/benchmark.js",
+    "benchmark:quick": "node scripts/benchmark.js --quick",
+    "build": "node scripts/build-standalone.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT"
+}
