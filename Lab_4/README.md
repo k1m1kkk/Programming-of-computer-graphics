@@ -512,19 +512,11 @@ lab4_raster_10A/
 │   ├── run-tests.js
 │   └── benchmark-dataset.js
 │
-├── scripts/
-│   ├── build-standalone.mjs
-│   ├── benchmark.js
-│   └── generate-report.py
-│
-└── docs/
-    ├── ОТЧЕТ.md
-    ├── ОТЧЕТ.html
-    ├── ОТЧЕТ.pdf
-    ├── chart-count.png
-    ├── chart-length.png
-    ├── chart-circles.png
-    └── КОНТРОЛЬНЫЙ_СПИСОК.md
+└── scripts/
+    ├── build-standalone.mjs
+    ├── benchmark.js
+    └── generate-report.py
+
 ```
 
 ---
@@ -651,3 +643,10 @@ python scripts/generate-report.py
 2. Шолтанюк С. В. **Математические методы компьютерной графики. Часть 2. Основные алгоритмы вычислительной геометрии.** БГУ, 2025. Разделы 1.3 и 2.3.
 3. Pitteway M. L. V. *Algorithm for drawing ellipses or hyperbolae with a digital plotter*. The Computer Journal, 1967, 10(3), 282–289. [DOI](https://doi.org/10.1093/comjnl/10.3.282).
 4. [Растеризация неявно заданных кривых — University of Illinois, CS418](https://courses.grainger.illinois.edu/CS418/fa2025/text/implicit-curves.html).
+
+---
+
+## Ссылка на веб-приложение
+
+https://k1m1kkk.github.io/Programming-of-computer-graphics/Lab_4/
+
