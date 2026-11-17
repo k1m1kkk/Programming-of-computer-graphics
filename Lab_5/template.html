@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="theme-color" content="#101b35"/>
+<title>ClipLab 05 — Алгоритмы отсечения · группа 10А</title>
+<style>/* APP_STYLES */</style>
+</head>
+<body>
+<div class="shell">
+<header class="app-header">
+  <div class="brand"><span class="brand-icon">▣</span><div><strong>ClipLab</strong><small>Лабораторная № 5 · вариант 10 · группа 10А</small></div></div>
+  <nav class="navigation" aria-label="Разделы приложения">
+    <button class="nav-item active" type="button" data-tab="demo">Геометрия</button>
+    <button class="nav-item" type="button" data-tab="benchmark">Бенчмарк</button>
+    <button class="nav-item" type="button" data-tab="theory">Теория</button>
+    <button class="nav-item" type="button" data-tab="checks">Проверки</button>
+  </nav>
+</header>
+<main>
+<section class="panel active" id="panel-demo">
+  <div class="page-intro"><h1>Отсечение отрезков и многоугольников</h1><p>Исследуйте структурный и параметрический методы, сложные контуры и четверичное дерево для 500 000 динамических отрезков.</p></div>
+  <div class="workspace">
+    <aside class="controls paper">
+      <div class="section-title"><h2>Параметры сцены</h2></div>
+      <label class="field"><span>Режим</span><select id="mode"><option value="segments">Часть 1 · Коэн–Сазерленд</option><option value="convex">Часть 2 · Сайрус–Бек</option><option value="polygons">Многоугольники</option><option value="stress">500 000+ · Quadtree</option></select></label>
+      <div id="segment-controls">
+        <label class="field" id="algorithm-field"><span>Алгоритм прямоугольного отсечения</span><select id="algorithm"><option value="cohen" selected>Коэн–Сазерленд (вариант 10)</option><option value="liang">Лианг–Барски (сравнение 10А)</option></select></label>
+        <div class="field-label">Тестовые ситуации</div>
+        <div class="preset-grid"><button type="button" data-line-preset="cross">Пересечения</button><button type="button" data-line-preset="border">На границах</button><button type="button" data-line-preset="vertex">Через вершины</button><button type="button" data-line-preset="parallel">Параллельные</button></div>
+        <label class="field tall-field"><span>Координаты отрезков · X₁ Y₁ X₂ Y₂</span><textarea id="segments-input" rows="7" spellcheck="false"></textarea></label>
+        <div class="control-actions"><button id="apply-segments" type="button" class="outline-button">Применить</button><button id="compare" type="button" class="outline-button">Сравнить методы</button></div>
+        <div class="import-box"><label class="outline-button file-label" for="file-input">↑ Загрузить .txt</label><input id="file-input" type="file" accept=".txt,text/plain" hidden/><button id="export-txt" type="button" class="outline-button">↓ TXT</button></div>
+      </div>
+      <div id="convex-controls" hidden>
+        <div class="field-label">Выпуклый многоугольник-отсекатель · Часть 2 варианта 10</div>
+        <div class="preset-grid"><button type="button" data-convex-preset="diamond">Ромб</button><button type="button" data-convex-preset="triangle">Треугольник</button><button type="button" data-convex-preset="hexagon">Шестиугольник</button><button type="button" data-convex-preset="square">Прямоугольник</button></div>
+        <label class="field tall-field"><span>Вершины отсекателя · X Y</span><textarea id="convex-input" rows="6" spellcheck="false"></textarea></label>
+        <p class="inline-help">Рёбра соединяются по порядку. Поддерживается обход по и против часовой стрелки; невыпуклые контуры не допускаются.</p>
+        <button type="button" class="primary-button full" id="apply-convex">▶ Применить выпуклый отсекатель</button>
+      </div>
+      <div id="polygon-controls" hidden>
+        <div class="field-label">Примеры геометрии</div>
+        <div class="preset-grid"><button type="button" data-poly-preset="concave">Вогнутый контур</button><button type="button" data-poly-preset="split">Распад области</button><button type="button" data-poly-preset="hole">Отверстие</button><button type="button" data-poly-preset="bowtie">Самопересечение</button><button type="button" data-poly-preset="corners">Вершины окна</button><button type="button" data-poly-preset="overlap">Совпадение ребра</button></div>
+        <label class="field tall-field"><span>Вершины · X Y по одной на строку</span><textarea id="polygon-input" rows="11" spellcheck="false"></textarea></label>
+        <p class="inline-help">Контуры разделяются пустой строкой. Заливка — по правилу чётности, вложенный контур создаёт отверстие.</p>
+        <button id="apply-polygon" type="button" class="primary-button full">▶ Отсечь многоугольник</button>
+      </div>
+      <div id="stress-controls" hidden>
+        <label class="field"><span>Количество отрезков</span><select id="stress-count"><option value="100000">100 000</option><option value="500000" selected>500 000</option><option value="650000">650 000</option><option value="800000">800 000</option></select></label>
+        <label class="field"><span>Глубина Quadtree</span><select id="tree-depth"><option value="0">0 · полный перебор</option><option value="4">4</option><option value="6">6</option><option value="8" selected>8</option><option value="10">10</option></select></label>
+        <label class="field"><span>Плотность данных</span><select id="stress-density"><option value="0.6">Разреженная (0,6×)</option><option value="1" selected>Обычная (1×)</option><option value="3">Плотная (3×)</option><option value="8">Очень плотная (8×)</option></select></label>
+        <button id="build-tree" class="primary-button full" type="button">▶ Создать набор и индекс</button>
+        <label class="check-row"><input type="checkbox" id="animate-stress"/> Анимация 500 000 отрезков</label>
+        <label class="check-row"><input type="checkbox" id="independent-motion" checked/> Независимое движение каждого отрезка</label>
+        <p class="inline-help">При анимации каждый отрезок независимо колеблется вокруг исходной позиции; Quadtree использует консервативный поиск по максимальному смещению (3 единицы), без пропуска движущихся объектов.</p>
+        <div class="small-metrics" id="stress-summary">Данные ещё не созданы.</div>
+      </div>
+      <div id="rectangle-controls"><div class="control-divider"></div>
+      <div class="section-title compact"><h2>Прямоугольное окно</h2></div>
+      <div class="two-col">
+        <label class="field"><span>Xmin</span><input id="xmin" type="number" step="any" value="-10"/></label>
+        <label class="field"><span>Ymin</span><input id="ymin" type="number" step="any" value="-8"/></label>
+        <label class="field"><span>Xmax</span><input id="xmax" type="number" step="any" value="10"/></label>
+        <label class="field"><span>Ymax</span><input id="ymax" type="number" step="any" value="8"/></label>
+      </div>
+      <button class="outline-button full" id="apply-window" type="button">Применить окно</button></div>
+      <div class="control-divider"></div>
+      <div class="section-title compact"><h2>Вид</h2></div>
+      <div class="zoom-row"><span>Масштаб</span><div><button id="zoom-out" aria-label="Уменьшить">−</button><strong id="zoom-value">100 %</strong><button id="zoom-in" aria-label="Увеличить">+</button></div></div>
+      <label class="check-row"><input type="checkbox" id="show-grid" checked/> Координатная сетка</label>
+      <label class="check-row"><input type="checkbox" id="show-axes" checked/> Оси и подписи</label>
+      <label class="check-row"><input type="checkbox" id="show-original" checked/> Исходная геометрия</label>
+      <button id="reset-camera" type="button" class="outline-button full">Вписать геометрию в экран</button>
+      <div class="error" id="form-error" role="alert" hidden></div>
+    </aside>
+    <div class="visual-column">
+      <section class="paper stage">
+        <div class="stage-header"><div><h2>Интерактивная координатная плоскость</h2><p>Перетаскивайте окно за его внутреннюю область, углы — для изменения размера. Отрезки можно перемещать целиком; потяните за конец, чтобы изменить длину.</p></div><button id="export-png" class="outline-button" type="button">↓ PNG</button></div>
+        <div class="geometry-viewport" id="geometry-viewport"><canvas id="stress-canvas" aria-hidden="true"></canvas><canvas id="geometry-canvas" aria-label="Интерактивная геометрическая плоскость"></canvas><div class="stage-badge" id="canvas-badge">Результат отсечения</div></div>
+        <div class="stage-footer"><span><i class="legend-dot original"></i> Исходная фигура</span><span><i class="legend-dot window"></i> Окно</span><span><i class="legend-dot visible"></i> Видимая часть</span><span>Курсор: <b id="cursor-coordinates">—</b></span></div>
+      </section>
+      <section class="stat-grid"><div class="stat paper"><small id="stat-total-label">Всего отрезков</small><strong id="stat-total">0</strong><span>Исходная геометрия</span></div><div class="stat paper"><small>Видимых объектов</small><strong id="stat-visible">0</strong><span>После отсечения</span></div><div class="stat paper"><small id="stat-work-label">Отсечение</small><strong id="stat-work">0 мс</strong><span id="stat-work-hint">Без отрисовки Canvas</span></div></section>
+      <section class="paper trace-section" id="segment-details"><div class="section-title"><div><h2>Сравнение и арифметические операции</h2><p>Счётчики умножений и делений учитываются внутри вычислительных методов.</p></div></div><div id="compare-results" class="compare-results"><p>Нажмите «Сравнить методы», чтобы увидеть точную статистику для текущих отрезков.</p></div><div class="table-scroll"><table><thead><tr><th>#</th><th>Исходные координаты</th><th>Видимый фрагмент</th></tr></thead><tbody id="segment-table"></tbody></table></div></section>
+      <section class="paper trace-section" id="polygon-details" hidden><div class="section-title"><div><h2>Топология результата</h2><p>Контурный граф восстанавливает независимые компоненты и внутренние границы.</p></div></div><div id="polygon-stats"></div><div class="table-scroll"><table><thead><tr><th>Контур</th><th>Число вершин</th><th>Площадь (ориентированная)</th><th>Назначение</th></tr></thead><tbody id="polygon-table"></tbody></table></div></section>
+      <section class="paper trace-section" id="stress-details" hidden><div class="section-title"><div><h2>Статистика пространственного индекса</h2><p>На каждом запросе Quadtree исключает целые невидимые поддеревья.</p></div><div class="fps-metrics"><span class="muted" id="fps-label">— FPS</span><span class="muted" id="query-fps-label">Точное отсечение: —</span></div></div><button type="button" class="outline-button" id="stress-compare" style="margin-bottom:12px">Сравнить оба метода на всём наборе</button><div id="stress-compare-results"></div><div class="metrics-row"><div>Узлов проверено <strong id="tree-nodes-visited">—</strong></div><div>Кандидатов <strong id="tree-candidates">—</strong></div><div>AABB отброшено <strong id="tree-rejected">—</strong></div><div>Линий в буфере <strong id="tree-rendered">—</strong></div></div><p class="footnote">FPS — фактически измеренная частота перерисовок, а не гарантированное значение. Видимые отрезки передаются на отдельный ускоренный Canvas (WebGL2, если доступен); при отсутствии WebGL используется 2D Canvas. Частота рендеринга и частота пересчёта точных координат измеряются отдельно; 60 FPS не гарантируются на всех устройствах и плотностях данных.</p></section>
+    </div>
+  </div>
+</section>
+<section class="panel" id="panel-benchmark">
+  <div class="page-intro"><h1>Аналитический бенчмарк</h1><p>Проверка эффективности индекса на реальных измерениях для 500 000 отрезков при разных глубинах дерева и плотности сцены.</p></div>
+  <section class="paper benchmark-banner"><div><h2>Воспроизводимый эксперимент</h2><p>Один seed = 2026 для всех методов; 16 окон на сценарий; сравнение полного перебора и Quadtree на глубинах 4, 6, 8. Измерения только вычислений, без Canvas.</p><div class="benchmark-metrics"><span>500 000 <small>отрезков</small></span><span>3 <small>плотности</small></span><span>4 <small>глубины</small></span><span>16 <small>запросов/сценарий</small></span></div></div><button class="primary-button" id="run-benchmark" type="button">▶ Запустить измерения</button></section>
+  <section class="paper progress-paper" id="benchmark-progress" hidden><div class="progress-title"><strong id="benchmark-progress-text">Создание данных...</strong><span id="benchmark-progress-value">0%</span></div><div class="progress-track"><div id="benchmark-progress-fill"></div></div></section>
+  <div class="benchmark-empty" id="benchmark-empty">Результатов пока нет. Запустите эксперимент: графики появятся только после фактических измерений.</div>
+  <div id="benchmark-content" hidden><div class="chart-grid"><section class="paper chart-card"><h2>Время отсечения / глубина дерева</h2><p>Медиана времени запроса в миллисекундах, по одной кривой на плотность.</p><div id="chart-depth"></div></section><section class="paper chart-card"><h2>Число просмотренных отрезков</h2><p>Среднее число кандидатов из 500 000.</p><div id="chart-candidates"></div></section></div><section class="paper report-card"><div class="section-title"><div><h2>Таблица измерений</h2><p>Построение индекса замеряется отдельно от поиска; возможны аппаратные различия.</p></div></div><div class="export-buttons"><button id="export-json" class="outline-button">↓ JSON</button><button id="export-csv" class="outline-button">↓ CSV</button></div><div class="table-scroll"><table><thead><tr><th>Плотность</th><th>Глубина</th><th>Индекс, мс</th><th>Медиана, мс</th><th>p95, мс</th><th>Кандидатов</th><th>Узлов</th></tr></thead><tbody id="benchmark-table"></tbody></table></div></section></div>
+  <section class="paper methodology"><h2>Что именно измеряется</h2><p>Алгоритм генерации создаёт 500 000 отрезков фиксированным псевдослучайным генератором. Для каждой плотности данные одни и те же при всех глубинах. Время создания данных исключено из запроса; время построения дерева показано отдельно. На каждом окне выполняются поиск кандидатов, битовая AABB-отбраковка и Коэн–Сазерленд (вариант 10). Графики не содержат заранее заданных значений. Порог 60 FPS соответствует бюджету 16,67 мс на кадр, включая обмен с worker и отображение; достижение проверяется на устройстве при включённой анимации.</p></section>
+</section>
+<section class="panel" id="panel-theory"><div class="page-intro"><h1>Теория алгоритмов</h1><p>Ключевые формулы, сложности и принципы, которые используются в реализации.</p></div>
+<div class="theory-grid">
+  <article class="paper theory-card"><h2>Коэн–Сазерленд</h2><p>Структурное отсечение по 4-битным кодам положения концов относительно окна. Тривиальное принятие — побитовое OR равно 0; отбраковка — побитовое AND не равно 0. В остальных случаях пересекаем нужную границу.</p><div class="formula">code = LEFT | RIGHT | TOP | BOTTOM<br>accept: (code₁ | code₂) = 0<br>reject: (code₁ &amp; code₂) ≠ 0</div></article>
+  <article class="paper theory-card"><h2>Сайрус–Бек · часть 2 варианта 10</h2><p>Параметрическое отсечение прямыми, содержащими стороны выпуклого многоугольника. Ориентация обхода определяется автоматически. Для каждого ребра сужается интервал t.</p><div class="formula">P(t) = A + t(B − A)<br>sign · cross(Eᵢ, P(t) − Cᵢ) ≥ −ε · |Eᵢ|<br>t₀ ≤ t ≤ t₁</div></article>
+  <article class="paper theory-card"><h2>Лианг–Барски · дополнительное сравнение</h2><p>Параметрическое представление. Для четырёх границ вычисляются значения pᵢ и qᵢ; интервал параметров [t₀, t₁] сужается до видимой части.</p><div class="formula">P(t) = A + t(B − A), 0 ≤ t ≤ 1<br>pᵢ · t ≤ qᵢ<br>pᵢ &lt; 0 → t₀ = max(t₀, qᵢ/pᵢ)<br>pᵢ &gt; 0 → t₁ = min(t₁, qᵢ/pᵢ)</div></article>
+  <article class="paper theory-card"><h2>Устойчивость вычислений</h2><p>Для геометрических условий используется абсолютная погрешность ε = 10⁻⁷. Параллельные линии, пересечения в вершинах, касания и отрезки нулевой длины имеют отдельную обработку.</p><div class="formula">ε = 0.0000001<br>equal(a,b) ⇔ |a − b| ≤ ε<br>boundary-inclusive clipping</div></article>
+  <article class="paper theory-card"><h2>Уайлер–Атертон / контурный граф</h2><p>Сначала находим пересечения рёбер, расщепляем контуры в этих точках, затем по двум сторонам каждого фрагмента проверяем принадлежность пересечению фигур. По ориентированным рёбрам восстанавливаем замкнутые контуры результата. Расширение графом поддерживает самопересечения и вложенные контуры при правиле чётности.</p><div class="formula">R = Subject ∩ Window<br>inside(R) = inside(Subject) ∧ inside(Window)<br>Контуры результата: отдельные циклы графа</div></article>
+  <article class="paper theory-card"><h2>Битовый AABB pre-filter</h2><p>Перед точным отсечением сравниваются минимальные и максимальные координаты отрезка с окном. Если хотя бы один бит (LEFT, RIGHT, TOP, BOTTOM) установлен, сегмент исключается без делений.</p><div class="formula">max(x₁,x₂) &lt; xmin − ε → LEFT<br>min(x₁,x₂) &gt; xmax + ε → RIGHT<br>AABB_mask ≠ 0 → исключить</div></article>
+  <article class="paper theory-card"><h2>Quadtree и производительность</h2><p>Пространство рекурсивно делится на четыре квадранта. Отрезок опускается в дочерний узел, только если его AABB помещается целиком; иначе хранится в предке. Запрос не обходит узлы вне окна. Типичная скорость зависит от распределения; O(log N) не гарантируется в худшем случае.</p><div class="formula">построение: O(N · D) обычно<br>поиск: O(посещённых узлов + кандидатов)<br>D ≤ 10, N ≥ 500 000</div></article>
+</div>
+<section class="paper methodology"><h2>Обозначения на холсте</h2><p>Серым показана исходная геометрия, синим — отсекатель, зелёным — видимая часть. Оси координат и сетка масштабируются без изменения исходных числовых координат. Все математические операции выполняются в исходной системе координат; Canvas служит только для визуализации.</p></section>
+</section>
+<section class="panel" id="panel-checks"><div class="page-intro"><h1>Проверки корректности</h1><p>Набор автоматически проверяемых случаев, включая обязательные маркеры группы 10А.</p></div><section class="paper checks-paper"><button id="run-checks" type="button" class="primary-button">▶ Запустить проверки</button><div id="check-summary" class="checks-summary">Проверки ещё не запускались.</div><div id="check-results"></div><p class="footnote">Расширенные тесты с точными ожидаемыми значениями доступны также через <code>npm test</code> в терминале.</p></section></section>
+</main>
+</div>
+<script>/* APP_SCRIPT */</script>
+</body>
+</html>

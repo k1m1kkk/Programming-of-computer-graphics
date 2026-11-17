@@ -1,0 +1,169 @@
+{
+  "meta": {
+    "count": 500000,
+    "depths": [
+      0,
+      4,
+      6,
+      8
+    ],
+    "densities": [
+      0.6,
+      1,
+      3
+    ],
+    "samples": 16,
+    "seed": 2026,
+    "elapsedMs": 5221.057387,
+    "algorithm": "cohen",
+    "numericFormat": "Float64Array",
+    "timestamp": "2026-11-03T10:43:24.164Z",
+    "platform": "Node.js/22"
+  },
+  "results": [
+    {
+      "count": 500000,
+      "density": 0.6,
+      "depth": 0,
+      "buildMs": 0.0025979999999776737,
+      "medianMs": 33.68507199999999,
+      "p95Ms": 49.50905,
+      "meanCandidates": 500000,
+      "meanVisible": 693.9375,
+      "nodes": 0,
+      "samples": 16
+    },
+    {
+      "count": 500000,
+      "density": 0.6,
+      "depth": 4,
+      "buildMs": 151.995902,
+      "medianMs": 1.936040999999932,
+      "p95Ms": 9.082833999999934,
+      "meanCandidates": 10682.4375,
+      "meanVisible": 693.9375,
+      "nodes": 341,
+      "samples": 16
+    },
+    {
+      "count": 500000,
+      "density": 0.6,
+      "depth": 6,
+      "buildMs": 267.4134670000001,
+      "medianMs": 1.1322059999999965,
+      "p95Ms": 2.2829830000000584,
+      "meanCandidates": 8789.75,
+      "meanVisible": 693.9375,
+      "nodes": 5461,
+      "samples": 16
+    },
+    {
+      "count": 500000,
+      "density": 0.6,
+      "depth": 8,
+      "buildMs": 484.1667140000002,
+      "medianMs": 1.2520959999999377,
+      "p95Ms": 6.189678999999842,
+      "meanCandidates": 8689.9375,
+      "meanVisible": 693.9375,
+      "nodes": 23873,
+      "samples": 16
+    },
+    {
+      "count": 500000,
+      "density": 1,
+      "depth": 0,
+      "buildMs": 0.051656999999977415,
+      "medianMs": 36.50887899999998,
+      "p95Ms": 70.50995599999987,
+      "meanCandidates": 500000,
+      "meanVisible": 1151.1875,
+      "nodes": 0,
+      "samples": 16
+    },
+    {
+      "count": 500000,
+      "density": 1,
+      "depth": 4,
+      "buildMs": 120.39726400000018,
+      "medianMs": 3.2017100000002756,
+      "p95Ms": 12.243070999999873,
+      "meanCandidates": 15575.5625,
+      "meanVisible": 1151.1875,
+      "nodes": 341,
+      "samples": 16
+    },
+    {
+      "count": 500000,
+      "density": 1,
+      "depth": 6,
+      "buildMs": 225.83371800000032,
+      "medianMs": 1.91399599999977,
+      "p95Ms": 4.962594000000081,
+      "meanCandidates": 12449.5625,
+      "meanVisible": 1151.1875,
+      "nodes": 4965,
+      "samples": 16
+    },
+    {
+      "count": 500000,
+      "density": 1,
+      "depth": 8,
+      "buildMs": 382.1007360000003,
+      "medianMs": 2.595520999999735,
+      "p95Ms": 5.826996000000236,
+      "meanCandidates": 12288,
+      "meanVisible": 1151.1875,
+      "nodes": 19369,
+      "samples": 16
+    },
+    {
+      "count": 500000,
+      "density": 3,
+      "depth": 0,
+      "buildMs": 0.0032419999997728155,
+      "medianMs": 33.3332960000007,
+      "p95Ms": 146.65414300000066,
+      "meanCandidates": 500000,
+      "meanVisible": 3171.8125,
+      "nodes": 0,
+      "samples": 16
+    },
+    {
+      "count": 500000,
+      "density": 3,
+      "depth": 4,
+      "buildMs": 100.25878200000079,
+      "medianMs": 6.990587999999661,
+      "p95Ms": 18.322665000000598,
+      "meanCandidates": 34973.8125,
+      "meanVisible": 3171.8125,
+      "nodes": 229,
+      "samples": 16
+    },
+    {
+      "count": 500000,
+      "density": 3,
+      "depth": 6,
+      "buildMs": 186.42477000000054,
+      "medianMs": 4.175185000000056,
+      "p95Ms": 8.188605999999709,
+      "meanCandidates": 26305.9375,
+      "meanVisible": 3171.8125,
+      "nodes": 1925,
+      "samples": 16
+    },
+    {
+      "count": 500000,
+      "density": 3,
+      "depth": 8,
+      "buildMs": 314.2559680000004,
+      "medianMs": 7.464208000000326,
+      "p95Ms": 33.77247299999999,
+      "meanCandidates": 25819.5625,
+      "meanVisible": 3171.8125,
+      "nodes": 20349,
+      "samples": 16
+    }
+  ]
+}

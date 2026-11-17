@@ -1,0 +1,1758 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="theme-color" content="#101b35"/>
+<title>ClipLab 05 — Алгоритмы отсечения · группа 10А</title>
+<style>:root {
+  color-scheme: light;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 15px;
+  line-height: 1.55;
+  color: #263249;
+  background: #f6f7f9;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; }
+button, select, input { font: inherit; }
+button { cursor: pointer; }
+button:disabled { cursor: wait; opacity: .55; }
+input[type="checkbox"], input[type="range"] { accent-color: #2863bd; }
+h1,h2,p { margin: 0; }
+h1 { color: #202b3d; font-size: clamp(1.45rem,2.6vw,2.15rem); font-weight: 700; letter-spacing: -.03em; }
+h2 { font-size: 1.04rem; color: #202b3d; line-height: 1.4; }
+p { color: #627087; }
+.shell { width: min(1260px,calc(100% - 40px)); margin: 0 auto 56px; }
+.app-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; border-bottom: 1px solid #dee4ec; padding: 16px 0; margin-bottom: 24px; }
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand-icon { font-size: 25px; color: #2863bd; font-weight: 700; }
+.brand strong { display: block; font-size: 1.18rem; line-height: 1.2; color: #263249; }
+.brand small { font-size: .81rem; color: #7b8799; }
+.navigation { display: flex; flex-wrap: wrap; gap: 5px; }
+.nav-item { padding: 9px 15px; border: 0; color: #58677c; border-radius: 8px; background: none; font-weight: 600; }
+.nav-item:hover { background: #e8edf5; }
+.nav-item.active { background: #2863bd; color: white; }
+.panel { display: none; }
+.panel.active { display: block; }
+.page-intro { margin-bottom: 18px; }
+.page-intro p { margin-top: 4px; max-width: 830px; }
+.paper { background: white; border: 1px solid #e0e6ee; border-radius: 12px; box-shadow: 0 2px 7px rgba(32,48,76,.025); }
+.workspace { display: grid; grid-template-columns: 305px minmax(0,1fr); gap: 16px; align-items: start; }
+.controls { padding: 20px; }
+.section-title { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 15px; }
+.section-title p { margin-top: 4px; font-size: .84rem; }
+.section-title.compact { margin-bottom: 12px; }
+.field { display: flex; flex-direction: column; gap: 5px; font-size: .88rem; color: #536177; margin-bottom: 12px; }
+.field > span:first-child, .field-label { font-weight: 600; color: #45536a; }
+.field-label { font-size: .84rem; margin: 16px 0 8px; display: flex; justify-content: space-between; }
+.field-label span { font-weight: 400; color: #8190a3; }
+.field input, .field select { min-width: 0; width: 100%; height: 40px; border: 1px solid #d4dce7; border-radius: 7px; padding: 0 10px; background: white; color: #263249; outline-color: #2863bd; }
+.two-col { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 9px; }
+.two-col .field { margin-bottom: 3px; }
+.primary-button { background: #2863bd; color: white; border: 1px solid #2863bd; border-radius: 8px; padding: 10px 16px; font-weight: 650; }
+.primary-button:hover { background: #1d519f; }
+.controls > .primary-button { width: 100%; margin-top: 12px; }
+.outline-button, .subtle-button, .preset-grid button { color: #335b98; background: #fff; border: 1px solid #d9e1ec; border-radius: 7px; padding: 8px 11px; }
+.outline-button:hover, .subtle-button:hover, .preset-grid button:hover { background: #f0f5fc; }
+.subtle-button { width: 100%; margin: 12px 0 4px; font-size: .85rem; }
+.control-divider { border-top: 1px solid #e5eaf0; margin: 20px 0; }
+.zoom-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: .88rem; color: #536177; margin-bottom: 12px; }
+.zoom-row > div { display: inline-flex; align-items: center; gap: 5px; }
+.zoom-row button { width: 31px; height: 31px; border: 1px solid #dae1eb; border-radius: 6px; background: white; }
+.zoom-row strong { font-weight: 600; text-align: center; min-width: 48px; }
+.check-row { display: block; font-size: .89rem; color: #48566d; margin: 7px 0; }
+.check-row input { vertical-align: middle; margin-right: 6px; }
+.preset-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 7px; }
+.preset-grid button { font-size: .81rem; padding: 8px 4px; }
+.error { color: #b22e39; background: #fff1f1; border-radius: 7px; padding: 9px; margin-top: 10px; font-size: .84rem; }
+.visual-column { display: grid; gap: 14px; min-width: 0; }
+.stage { min-width: 0; overflow: hidden; }
+.stage-header { padding: 15px 17px 13px; display: flex; justify-content: space-between; align-items: center; gap: 15px; }
+.stage-header p { font-size: .84rem; margin-top: 3px; }
+.canvas-viewport { width: 100%; max-width: 100%; height: min(56vh,510px); min-height: 310px; overflow: auto; position: relative; background: #fdfefd; border-top: 1px solid #e6ebf2; border-bottom: 1px solid #e6ebf2; }
+.canvas-viewport canvas { display: block; max-width: none; }
+.stage-footer { padding: 11px 15px; display: flex; gap: 16px; flex-wrap: wrap; color: #647188; font-size: .82rem; }
+.stage-footer b { color: #28344a; }
+.pixel-dot { width: 10px; height: 10px; background: #2863bd; display: inline-block; margin-right: 3px; }
+.stat-grid { min-width: 0; display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 10px; }
+.stat { padding: 12px 15px; }
+.stat small { display: block; color: #6c7b8f; font-size: .78rem; }
+.stat strong { font-size: 1.35rem; display: block; line-height: 1.4; color: #263249; }
+.stat > span { display: block; color: #8791a2; font-size: .72rem; }
+.trace-section { min-width: 0; padding: 18px; }
+.trace-toolbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
+.trace-toolbar input { min-width: 100px; flex: 1 1 120px; }
+.trace-toolbar button { white-space: nowrap; }
+.table-scroll { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: .84rem; text-align: left; }
+th,td { padding: 9px 11px; border-bottom: 1px solid #e7ecf2; }
+th { color: #617188; background: #f6f8fb; font-weight: 600; white-space: nowrap; }
+td { color: #394960; }
+.benchmark-banner { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 20px; }
+.benchmark-banner p { font-size: .9rem; margin: 5px 0 12px; }
+.benchmark-banner button { flex-shrink: 0; }
+.benchmark-metrics { display: flex; gap: 20px; flex-wrap: wrap; }
+.benchmark-metrics span { font-weight: 700; color: #2c466f; }
+.benchmark-metrics small { color: #738095; font-size: .78rem; font-weight: 400; }
+.progress-paper { padding: 14px 18px; margin-top: 14px; }
+.progress-title { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 8px; font-size: .86rem; }
+.progress-track { height: 8px; border-radius: 6px; overflow: hidden; background: #e6edf5; }
+#progress-fill { height: 100%; width: 0; background: #2863bd; transition: width .2s; }
+.benchmark-empty { margin: 18px 0; padding: 25px 15px; text-align: center; color: #7b889a; border: 1px dashed #cad4e1; border-radius: 10px; }
+.chart-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; margin: 14px 0; }
+.chart-card, .report-card { padding: 20px; margin-top: 14px; }
+.chart-grid .chart-card { margin-top: 0; }
+.chart-card p { font-size: .85rem; margin: 4px 0 11px; }
+.chart-card svg { display: block; width: 100%; height: auto; }
+.chart-legend { display: flex; flex-wrap: wrap; gap: 7px 15px; font-size: .79rem; color: #617085; margin-top: 5px; }
+.chart-legend i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 4px; }
+.report-card > div:first-child { margin-bottom: 9px; }
+.export-buttons { display: flex; gap: 8px; margin-bottom: 12px; }
+.footnote { margin-top: 12px; font-size: .82rem; }
+.theory-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; }
+.theory-card, .methodology, .checks-paper { padding: 19px; }
+.theory-card p, .methodology p { font-size: .89rem; margin-top: 9px; }
+.formula { margin-top: 12px; padding: 12px; border-radius: 7px; background: #f3f6fa; font: .88rem/1.7 ui-monospace,"Cascadia Mono",Consolas,monospace; white-space: normal; overflow-wrap: anywhere; }
+.methodology { margin-top: 15px; }
+.checks-summary { margin: 16px 0; color: #5c6a7f; }
+.check-item { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; border-top: 1px solid #e9edf2; padding: 10px 0; font-size: .87rem; }
+.check-item strong { color: #31764d; font-size: .75rem; }
+.check-item.fail strong { color: #be3443; }
+code { background: #f1f4f8; border-radius: 4px; padding: 0 3px; }
+@media (max-width:1000px) { .workspace { grid-template-columns: 265px minmax(0,1fr); } .chart-grid { grid-template-columns: 1fr; } }
+@media (max-width:780px) { .shell { width: min(100% - 24px,640px); } .app-header { align-items: flex-start; } .navigation { width: 100%; } .nav-item { flex: 1; padding: 10px 4px; font-size: .83rem; } .workspace, .theory-grid { grid-template-columns: minmax(0,1fr); } .controls { padding: 16px; } .canvas-viewport { width: 100%; max-width: 100%; height: 430px; } .benchmark-banner { flex-direction: column; align-items: stretch; } .stat { padding: 10px; } .stat > span { display: none; } .stat small { font-size: .72rem; } .stat strong { font-size: 1.14rem; } }
+textarea { width: 100%; border: 1px solid #d4dce7; background: #fff; border-radius: 7px; color: #263249; padding: 10px; font: .83rem/1.55 ui-monospace, Consolas, monospace; resize: vertical; min-height: 105px; outline-color: #2863bd; }
+.tall-field { margin: 14px 0 5px; }
+.inline-help { font-size: .79rem; line-height: 1.48; margin: 7px 0 12px; }
+.full { display: block; width: 100%; }
+.control-actions, .import-box { display: flex; gap: 7px; }
+.control-actions > *, .import-box > * { flex: 1; text-align: center; font-size: .83rem; }
+.import-box { margin-top: 9px; }
+.file-label { cursor: pointer; }
+.small-metrics { margin: 12px 0 0; background: #f5f8fc; color: #536177; padding: 9px; border-radius: 7px; font-size: .82rem; }
+.geometry-viewport { position: relative; height: min(58vh, 530px); min-height: 370px; background: #fdfefd; overflow: hidden; border-top: 1px solid #e6ebf2; border-bottom: 1px solid #e6ebf2; }
+.geometry-viewport canvas { width: 100%; height: 100%; display: block; touch-action: none; cursor: crosshair; }
+.stage-badge { position: absolute; right: 12px; top: 11px; pointer-events: none; font-size: .74rem; border: 1px solid #dce5ee; border-radius: 5px; background: #fffdfdec; padding: 4px 8px; color: #65768c; }
+.legend-dot { width: 10px; height: 10px; border-radius: 3px; display: inline-block; margin-right: 3px; }
+.legend-dot.original { background: #9fa9b9; }.legend-dot.window { background: #2863bd; }.legend-dot.visible { background: #14976e; }
+.compare-results { margin-bottom: 14px; }
+.compare-results p { font-size: .85rem; }
+.compare-table { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 10px 0; }
+.compare-table div { border: 1px solid #e4eaf0; border-radius: 8px; padding: 10px; }
+.compare-table small { display: block; color: #718099; font-size: .76rem; }
+.compare-table strong { display: block; font-size: 1.09rem; margin-top: 1px; }
+.compare-table span { display: block; font-size: .75rem; color: #718099; }
+.metrics-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.metrics-row div { background: #f6f8fb; border: 1px solid #e6edf2; border-radius: 7px; padding: 11px; color: #607086; font-size: .82rem; }
+.metrics-row strong { display: block; color: #263249; font-size: 1.2rem; }
+#fps-label { color: #536177; font-weight: 600; font-size: .88rem; white-space: nowrap; }
+.chart-card svg { overflow: visible; }
+.note-good { color: #216f4a; }.note-error { color: #b53241; }
+@media (max-width:780px) { .geometry-viewport { height: 410px; } .metrics-row { grid-template-columns: repeat(2,1fr); } .compare-table { grid-template-columns: 1fr; } }
+
+.geometry-viewport #stress-canvas { position: absolute; left: 0; top: 0; z-index: 0; pointer-events: none; }
+.geometry-viewport #geometry-canvas { position: relative; z-index: 1; }
+
+.fps-metrics { display: flex; flex-direction: column; gap: 4px; text-align: right; font-size: .78rem; }
+</style>
+</head>
+<body>
+<div class="shell">
+<header class="app-header">
+  <div class="brand"><span class="brand-icon">▣</span><div><strong>ClipLab</strong><small>Лабораторная № 5 · вариант 10 · группа 10А</small></div></div>
+  <nav class="navigation" aria-label="Разделы приложения">
+    <button class="nav-item active" type="button" data-tab="demo">Геометрия</button>
+    <button class="nav-item" type="button" data-tab="benchmark">Бенчмарк</button>
+    <button class="nav-item" type="button" data-tab="theory">Теория</button>
+    <button class="nav-item" type="button" data-tab="checks">Проверки</button>
+  </nav>
+</header>
+<main>
+<section class="panel active" id="panel-demo">
+  <div class="page-intro"><h1>Отсечение отрезков и многоугольников</h1><p>Исследуйте структурный и параметрический методы, сложные контуры и четверичное дерево для 500 000 динамических отрезков.</p></div>
+  <div class="workspace">
+    <aside class="controls paper">
+      <div class="section-title"><h2>Параметры сцены</h2></div>
+      <label class="field"><span>Режим</span><select id="mode"><option value="segments">Часть 1 · Коэн–Сазерленд</option><option value="convex">Часть 2 · Сайрус–Бек</option><option value="polygons">Многоугольники</option><option value="stress">500 000+ · Quadtree</option></select></label>
+      <div id="segment-controls">
+        <label class="field" id="algorithm-field"><span>Алгоритм прямоугольного отсечения</span><select id="algorithm"><option value="cohen" selected>Коэн–Сазерленд (вариант 10)</option><option value="liang">Лианг–Барски (сравнение 10А)</option></select></label>
+        <div class="field-label">Тестовые ситуации</div>
+        <div class="preset-grid"><button type="button" data-line-preset="cross">Пересечения</button><button type="button" data-line-preset="border">На границах</button><button type="button" data-line-preset="vertex">Через вершины</button><button type="button" data-line-preset="parallel">Параллельные</button></div>
+        <label class="field tall-field"><span>Координаты отрезков · X₁ Y₁ X₂ Y₂</span><textarea id="segments-input" rows="7" spellcheck="false"></textarea></label>
+        <div class="control-actions"><button id="apply-segments" type="button" class="outline-button">Применить</button><button id="compare" type="button" class="outline-button">Сравнить методы</button></div>
+        <div class="import-box"><label class="outline-button file-label" for="file-input">↑ Загрузить .txt</label><input id="file-input" type="file" accept=".txt,text/plain" hidden/><button id="export-txt" type="button" class="outline-button">↓ TXT</button></div>
+      </div>
+      <div id="convex-controls" hidden>
+        <div class="field-label">Выпуклый многоугольник-отсекатель · Часть 2 варианта 10</div>
+        <div class="preset-grid"><button type="button" data-convex-preset="diamond">Ромб</button><button type="button" data-convex-preset="triangle">Треугольник</button><button type="button" data-convex-preset="hexagon">Шестиугольник</button><button type="button" data-convex-preset="square">Прямоугольник</button></div>
+        <label class="field tall-field"><span>Вершины отсекателя · X Y</span><textarea id="convex-input" rows="6" spellcheck="false"></textarea></label>
+        <p class="inline-help">Рёбра соединяются по порядку. Поддерживается обход по и против часовой стрелки; невыпуклые контуры не допускаются.</p>
+        <button type="button" class="primary-button full" id="apply-convex">▶ Применить выпуклый отсекатель</button>
+      </div>
+      <div id="polygon-controls" hidden>
+        <div class="field-label">Примеры геометрии</div>
+        <div class="preset-grid"><button type="button" data-poly-preset="concave">Вогнутый контур</button><button type="button" data-poly-preset="split">Распад области</button><button type="button" data-poly-preset="hole">Отверстие</button><button type="button" data-poly-preset="bowtie">Самопересечение</button><button type="button" data-poly-preset="corners">Вершины окна</button><button type="button" data-poly-preset="overlap">Совпадение ребра</button></div>
+        <label class="field tall-field"><span>Вершины · X Y по одной на строку</span><textarea id="polygon-input" rows="11" spellcheck="false"></textarea></label>
+        <p class="inline-help">Контуры разделяются пустой строкой. Заливка — по правилу чётности, вложенный контур создаёт отверстие.</p>
+        <button id="apply-polygon" type="button" class="primary-button full">▶ Отсечь многоугольник</button>
+      </div>
+      <div id="stress-controls" hidden>
+        <label class="field"><span>Количество отрезков</span><select id="stress-count"><option value="100000">100 000</option><option value="500000" selected>500 000</option><option value="650000">650 000</option><option value="800000">800 000</option></select></label>
+        <label class="field"><span>Глубина Quadtree</span><select id="tree-depth"><option value="0">0 · полный перебор</option><option value="4">4</option><option value="6">6</option><option value="8" selected>8</option><option value="10">10</option></select></label>
+        <label class="field"><span>Плотность данных</span><select id="stress-density"><option value="0.6">Разреженная (0,6×)</option><option value="1" selected>Обычная (1×)</option><option value="3">Плотная (3×)</option><option value="8">Очень плотная (8×)</option></select></label>
+        <button id="build-tree" class="primary-button full" type="button">▶ Создать набор и индекс</button>
+        <label class="check-row"><input type="checkbox" id="animate-stress"/> Анимация 500 000 отрезков</label>
+        <label class="check-row"><input type="checkbox" id="independent-motion" checked/> Независимое движение каждого отрезка</label>
+        <p class="inline-help">При анимации каждый отрезок независимо колеблется вокруг исходной позиции; Quadtree использует консервативный поиск по максимальному смещению (3 единицы), без пропуска движущихся объектов.</p>
+        <div class="small-metrics" id="stress-summary">Данные ещё не созданы.</div>
+      </div>
+      <div id="rectangle-controls"><div class="control-divider"></div>
+      <div class="section-title compact"><h2>Прямоугольное окно</h2></div>
+      <div class="two-col">
+        <label class="field"><span>Xmin</span><input id="xmin" type="number" step="any" value="-10"/></label>
+        <label class="field"><span>Ymin</span><input id="ymin" type="number" step="any" value="-8"/></label>
+        <label class="field"><span>Xmax</span><input id="xmax" type="number" step="any" value="10"/></label>
+        <label class="field"><span>Ymax</span><input id="ymax" type="number" step="any" value="8"/></label>
+      </div>
+      <button class="outline-button full" id="apply-window" type="button">Применить окно</button></div>
+      <div class="control-divider"></div>
+      <div class="section-title compact"><h2>Вид</h2></div>
+      <div class="zoom-row"><span>Масштаб</span><div><button id="zoom-out" aria-label="Уменьшить">−</button><strong id="zoom-value">100 %</strong><button id="zoom-in" aria-label="Увеличить">+</button></div></div>
+      <label class="check-row"><input type="checkbox" id="show-grid" checked/> Координатная сетка</label>
+      <label class="check-row"><input type="checkbox" id="show-axes" checked/> Оси и подписи</label>
+      <label class="check-row"><input type="checkbox" id="show-original" checked/> Исходная геометрия</label>
+      <button id="reset-camera" type="button" class="outline-button full">Вписать геометрию в экран</button>
+      <div class="error" id="form-error" role="alert" hidden></div>
+    </aside>
+    <div class="visual-column">
+      <section class="paper stage">
+        <div class="stage-header"><div><h2>Интерактивная координатная плоскость</h2><p>Перетаскивайте окно за его внутреннюю область, углы — для изменения размера. Отрезки можно перемещать целиком; потяните за конец, чтобы изменить длину.</p></div><button id="export-png" class="outline-button" type="button">↓ PNG</button></div>
+        <div class="geometry-viewport" id="geometry-viewport"><canvas id="stress-canvas" aria-hidden="true"></canvas><canvas id="geometry-canvas" aria-label="Интерактивная геометрическая плоскость"></canvas><div class="stage-badge" id="canvas-badge">Результат отсечения</div></div>
+        <div class="stage-footer"><span><i class="legend-dot original"></i> Исходная фигура</span><span><i class="legend-dot window"></i> Окно</span><span><i class="legend-dot visible"></i> Видимая часть</span><span>Курсор: <b id="cursor-coordinates">—</b></span></div>
+      </section>
+      <section class="stat-grid"><div class="stat paper"><small id="stat-total-label">Всего отрезков</small><strong id="stat-total">0</strong><span>Исходная геометрия</span></div><div class="stat paper"><small>Видимых объектов</small><strong id="stat-visible">0</strong><span>После отсечения</span></div><div class="stat paper"><small id="stat-work-label">Отсечение</small><strong id="stat-work">0 мс</strong><span id="stat-work-hint">Без отрисовки Canvas</span></div></section>
+      <section class="paper trace-section" id="segment-details"><div class="section-title"><div><h2>Сравнение и арифметические операции</h2><p>Счётчики умножений и делений учитываются внутри вычислительных методов.</p></div></div><div id="compare-results" class="compare-results"><p>Нажмите «Сравнить методы», чтобы увидеть точную статистику для текущих отрезков.</p></div><div class="table-scroll"><table><thead><tr><th>#</th><th>Исходные координаты</th><th>Видимый фрагмент</th></tr></thead><tbody id="segment-table"></tbody></table></div></section>
+      <section class="paper trace-section" id="polygon-details" hidden><div class="section-title"><div><h2>Топология результата</h2><p>Контурный граф восстанавливает независимые компоненты и внутренние границы.</p></div></div><div id="polygon-stats"></div><div class="table-scroll"><table><thead><tr><th>Контур</th><th>Число вершин</th><th>Площадь (ориентированная)</th><th>Назначение</th></tr></thead><tbody id="polygon-table"></tbody></table></div></section>
+      <section class="paper trace-section" id="stress-details" hidden><div class="section-title"><div><h2>Статистика пространственного индекса</h2><p>На каждом запросе Quadtree исключает целые невидимые поддеревья.</p></div><div class="fps-metrics"><span class="muted" id="fps-label">— FPS</span><span class="muted" id="query-fps-label">Точное отсечение: —</span></div></div><button type="button" class="outline-button" id="stress-compare" style="margin-bottom:12px">Сравнить оба метода на всём наборе</button><div id="stress-compare-results"></div><div class="metrics-row"><div>Узлов проверено <strong id="tree-nodes-visited">—</strong></div><div>Кандидатов <strong id="tree-candidates">—</strong></div><div>AABB отброшено <strong id="tree-rejected">—</strong></div><div>Линий в буфере <strong id="tree-rendered">—</strong></div></div><p class="footnote">FPS — фактически измеренная частота перерисовок, а не гарантированное значение. Видимые отрезки передаются на отдельный ускоренный Canvas (WebGL2, если доступен); при отсутствии WebGL используется 2D Canvas. Частота рендеринга и частота пересчёта точных координат измеряются отдельно; 60 FPS не гарантируются на всех устройствах и плотностях данных.</p></section>
+    </div>
+  </div>
+</section>
+<section class="panel" id="panel-benchmark">
+  <div class="page-intro"><h1>Аналитический бенчмарк</h1><p>Проверка эффективности индекса на реальных измерениях для 500 000 отрезков при разных глубинах дерева и плотности сцены.</p></div>
+  <section class="paper benchmark-banner"><div><h2>Воспроизводимый эксперимент</h2><p>Один seed = 2026 для всех методов; 16 окон на сценарий; сравнение полного перебора и Quadtree на глубинах 4, 6, 8. Измерения только вычислений, без Canvas.</p><div class="benchmark-metrics"><span>500 000 <small>отрезков</small></span><span>3 <small>плотности</small></span><span>4 <small>глубины</small></span><span>16 <small>запросов/сценарий</small></span></div></div><button class="primary-button" id="run-benchmark" type="button">▶ Запустить измерения</button></section>
+  <section class="paper progress-paper" id="benchmark-progress" hidden><div class="progress-title"><strong id="benchmark-progress-text">Создание данных...</strong><span id="benchmark-progress-value">0%</span></div><div class="progress-track"><div id="benchmark-progress-fill"></div></div></section>
+  <div class="benchmark-empty" id="benchmark-empty">Результатов пока нет. Запустите эксперимент: графики появятся только после фактических измерений.</div>
+  <div id="benchmark-content" hidden><div class="chart-grid"><section class="paper chart-card"><h2>Время отсечения / глубина дерева</h2><p>Медиана времени запроса в миллисекундах, по одной кривой на плотность.</p><div id="chart-depth"></div></section><section class="paper chart-card"><h2>Число просмотренных отрезков</h2><p>Среднее число кандидатов из 500 000.</p><div id="chart-candidates"></div></section></div><section class="paper report-card"><div class="section-title"><div><h2>Таблица измерений</h2><p>Построение индекса замеряется отдельно от поиска; возможны аппаратные различия.</p></div></div><div class="export-buttons"><button id="export-json" class="outline-button">↓ JSON</button><button id="export-csv" class="outline-button">↓ CSV</button></div><div class="table-scroll"><table><thead><tr><th>Плотность</th><th>Глубина</th><th>Индекс, мс</th><th>Медиана, мс</th><th>p95, мс</th><th>Кандидатов</th><th>Узлов</th></tr></thead><tbody id="benchmark-table"></tbody></table></div></section></div>
+  <section class="paper methodology"><h2>Что именно измеряется</h2><p>Алгоритм генерации создаёт 500 000 отрезков фиксированным псевдослучайным генератором. Для каждой плотности данные одни и те же при всех глубинах. Время создания данных исключено из запроса; время построения дерева показано отдельно. На каждом окне выполняются поиск кандидатов, битовая AABB-отбраковка и Коэн–Сазерленд (вариант 10). Графики не содержат заранее заданных значений. Порог 60 FPS соответствует бюджету 16,67 мс на кадр, включая обмен с worker и отображение; достижение проверяется на устройстве при включённой анимации.</p></section>
+</section>
+<section class="panel" id="panel-theory"><div class="page-intro"><h1>Теория алгоритмов</h1><p>Ключевые формулы, сложности и принципы, которые используются в реализации.</p></div>
+<div class="theory-grid">
+  <article class="paper theory-card"><h2>Коэн–Сазерленд</h2><p>Структурное отсечение по 4-битным кодам положения концов относительно окна. Тривиальное принятие — побитовое OR равно 0; отбраковка — побитовое AND не равно 0. В остальных случаях пересекаем нужную границу.</p><div class="formula">code = LEFT | RIGHT | TOP | BOTTOM<br>accept: (code₁ | code₂) = 0<br>reject: (code₁ &amp; code₂) ≠ 0</div></article>
+  <article class="paper theory-card"><h2>Сайрус–Бек · часть 2 варианта 10</h2><p>Параметрическое отсечение прямыми, содержащими стороны выпуклого многоугольника. Ориентация обхода определяется автоматически. Для каждого ребра сужается интервал t.</p><div class="formula">P(t) = A + t(B − A)<br>sign · cross(Eᵢ, P(t) − Cᵢ) ≥ −ε · |Eᵢ|<br>t₀ ≤ t ≤ t₁</div></article>
+  <article class="paper theory-card"><h2>Лианг–Барски · дополнительное сравнение</h2><p>Параметрическое представление. Для четырёх границ вычисляются значения pᵢ и qᵢ; интервал параметров [t₀, t₁] сужается до видимой части.</p><div class="formula">P(t) = A + t(B − A), 0 ≤ t ≤ 1<br>pᵢ · t ≤ qᵢ<br>pᵢ &lt; 0 → t₀ = max(t₀, qᵢ/pᵢ)<br>pᵢ &gt; 0 → t₁ = min(t₁, qᵢ/pᵢ)</div></article>
+  <article class="paper theory-card"><h2>Устойчивость вычислений</h2><p>Для геометрических условий используется абсолютная погрешность ε = 10⁻⁷. Параллельные линии, пересечения в вершинах, касания и отрезки нулевой длины имеют отдельную обработку.</p><div class="formula">ε = 0.0000001<br>equal(a,b) ⇔ |a − b| ≤ ε<br>boundary-inclusive clipping</div></article>
+  <article class="paper theory-card"><h2>Уайлер–Атертон / контурный граф</h2><p>Сначала находим пересечения рёбер, расщепляем контуры в этих точках, затем по двум сторонам каждого фрагмента проверяем принадлежность пересечению фигур. По ориентированным рёбрам восстанавливаем замкнутые контуры результата. Расширение графом поддерживает самопересечения и вложенные контуры при правиле чётности.</p><div class="formula">R = Subject ∩ Window<br>inside(R) = inside(Subject) ∧ inside(Window)<br>Контуры результата: отдельные циклы графа</div></article>
+  <article class="paper theory-card"><h2>Битовый AABB pre-filter</h2><p>Перед точным отсечением сравниваются минимальные и максимальные координаты отрезка с окном. Если хотя бы один бит (LEFT, RIGHT, TOP, BOTTOM) установлен, сегмент исключается без делений.</p><div class="formula">max(x₁,x₂) &lt; xmin − ε → LEFT<br>min(x₁,x₂) &gt; xmax + ε → RIGHT<br>AABB_mask ≠ 0 → исключить</div></article>
+  <article class="paper theory-card"><h2>Quadtree и производительность</h2><p>Пространство рекурсивно делится на четыре квадранта. Отрезок опускается в дочерний узел, только если его AABB помещается целиком; иначе хранится в предке. Запрос не обходит узлы вне окна. Типичная скорость зависит от распределения; O(log N) не гарантируется в худшем случае.</p><div class="formula">построение: O(N · D) обычно<br>поиск: O(посещённых узлов + кандидатов)<br>D ≤ 10, N ≥ 500 000</div></article>
+</div>
+<section class="paper methodology"><h2>Обозначения на холсте</h2><p>Серым показана исходная геометрия, синим — отсекатель, зелёным — видимая часть. Оси координат и сетка масштабируются без изменения исходных числовых координат. Все математические операции выполняются в исходной системе координат; Canvas служит только для визуализации.</p></section>
+</section>
+<section class="panel" id="panel-checks"><div class="page-intro"><h1>Проверки корректности</h1><p>Набор автоматически проверяемых случаев, включая обязательные маркеры группы 10А.</p></div><section class="paper checks-paper"><button id="run-checks" type="button" class="primary-button">▶ Запустить проверки</button><div id="check-summary" class="checks-summary">Проверки ещё не запускались.</div><div id="check-results"></div><p class="footnote">Расширенные тесты с точными ожидаемыми значениями доступны также через <code>npm test</code> в терминале.</p></section></section>
+</main>
+</div>
+<script>(() => {
+'use strict';
+const EPS = 1e-7;
+const OUT_LEFT = 1;
+const OUT_RIGHT = 2;
+const OUT_BOTTOM = 4;
+const OUT_TOP = 8;
+
+function near(a, b, tolerance = EPS) { return Math.abs(a - b) <= tolerance; }
+function point(x, y) { return { x, y }; }
+function rect(xmin, ymin, xmax, ymax) {
+  if (![xmin, ymin, xmax, ymax].every(Number.isFinite) || xmin >= xmax - EPS || ymin >= ymax - EPS) {
+    throw new Error('Для окна необходимы конечные координаты xmin < xmax и ymin < ymax.');
+  }
+  return { xmin, ymin, xmax, ymax };
+}
+function outcode(x, y, r) {
+  let code = 0;
+  if (x < r.xmin - EPS) code |= OUT_LEFT;
+  if (x > r.xmax + EPS) code |= OUT_RIGHT;
+  if (y < r.ymin - EPS) code |= OUT_BOTTOM;
+  if (y > r.ymax + EPS) code |= OUT_TOP;
+  return code;
+}
+function inRect(x, y, r) { return outcode(x, y, r) === 0; }
+function aabbMask(x1, y1, x2, y2, r) {
+  let mask = 0;
+  if (Math.max(x1, x2) < r.xmin - EPS) mask |= OUT_LEFT;
+  if (Math.min(x1, x2) > r.xmax + EPS) mask |= OUT_RIGHT;
+  if (Math.max(y1, y2) < r.ymin - EPS) mask |= OUT_BOTTOM;
+  if (Math.min(y1, y2) > r.ymax + EPS) mask |= OUT_TOP;
+  return mask;
+}
+function boundsIntersect(a, b) {
+  return !(a.xmax < b.xmin - EPS || a.xmin > b.xmax + EPS ||
+    a.ymax < b.ymin - EPS || a.ymin > b.ymax + EPS);
+}
+function mult(a, b, stats) { if (stats) stats.mul++; return a * b; }
+function divide(a, b, stats) { if (stats) stats.div++; return a / b; }
+function newOps() { return { mul: 0, div: 0 }; }
+function interpolate(x1, y1, dx, dy, t, stats) {
+  return [x1 + mult(dx, t, stats), y1 + mult(dy, t, stats)];
+}
+function machineTolerance(...values) {
+  return Number.EPSILON * Math.max(1, ...values.map(Math.abs)) * 4;
+}
+
+// The epsilon-expanded closed window is shared by both independent algorithms.
+// Consequently, tolerance never moves the intersection behind an endpoint.
+function clipCohen(x1, y1, x2, y2, r, stats = null) {
+  let c1 = outcode(x1, y1, r), c2 = outcode(x2, y2, r);
+  const left = r.xmin - EPS, right = r.xmax + EPS;
+  const bottom = r.ymin - EPS, top = r.ymax + EPS;
+  for (let iteration = 0; iteration < 9; iteration++) {
+    if ((c1 | c2) === 0) return [x1, y1, x2, y2];
+    if ((c1 & c2) !== 0) return null;
+    const outside = c1 !== 0 ? c1 : c2;
+    let x, y;
+    if (outside & (OUT_TOP | OUT_BOTTOM)) {
+      const border = (outside & OUT_TOP) ? top : bottom;
+      const dy = y2 - y1;
+      if (Math.abs(dy) <= machineTolerance(y1, y2) && (c1 & c2)) return null;
+      const t = divide(border - y1, dy, stats);
+      x = x1 + mult(x2 - x1, t, stats);
+      y = border;
+    } else {
+      const border = (outside & OUT_RIGHT) ? right : left;
+      const dx = x2 - x1;
+      if (Math.abs(dx) <= machineTolerance(x1, x2) && (c1 & c2)) return null;
+      const t = divide(border - x1, dx, stats);
+      x = border;
+      y = y1 + mult(y2 - y1, t, stats);
+    }
+    if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
+    if (outside === c1) {
+      x1 = x; y1 = y; c1 = outcode(x1, y1, r);
+    } else {
+      x2 = x; y2 = y; c2 = outcode(x2, y2, r);
+    }
+  }
+  return null;
+}
+
+function clipLiang(x1, y1, x2, y2, r, stats = null) {
+  const dx = x2 - x1, dy = y2 - y1;
+  if (Math.abs(dx) <= machineTolerance(x1, x2) && Math.abs(dy) <= machineTolerance(y1, y2)) {
+    return inRect(x1, y1, r) ? [x1, y1, x1, y1] : null;
+  }
+  const ps = [-dx, dx, -dy, dy];
+  const qs = [x1 - (r.xmin - EPS), (r.xmax + EPS) - x1,
+    y1 - (r.ymin - EPS), (r.ymax + EPS) - y1];
+  let t0 = 0, t1 = 1;
+  for (let i = 0; i < 4; i++) {
+    const p = ps[i], q = qs[i];
+    const tolerance = machineTolerance(p, q) * 0.25;
+    if (Math.abs(p) <= tolerance) {
+      if (q < -tolerance) return null;
+      continue;
+    }
+    const t = divide(q, p, stats);
+    if (p < 0) t0 = Math.max(t0, t);
+    else t1 = Math.min(t1, t);
+    if (t0 > t1 + machineTolerance(t0, t1)) return null;
+  }
+  if (t0 > t1) t0 = t1 = (t0 + t1) / 2;
+  const a = t0 <= 0 ? [x1, y1] : interpolate(x1, y1, dx, dy, t0, stats);
+  const b = t1 >= 1 ? [x2, y2] : interpolate(x1, y1, dx, dy, t1, stats);
+  return [a[0], a[1], b[0], b[1]];
+}
+
+function cross(ax, ay, bx, by) { return ax * by - ay * bx; }
+function signedDoubleArea(vertices) {
+  let total = 0;
+  for (let i = 0; i < vertices.length; i++) {
+    const a = vertices[i], b = vertices[(i + 1) % vertices.length];
+    total += a.x * b.y - b.x * a.y;
+  }
+  return total;
+}
+function convexOrientation(vertices) {
+  if (!Array.isArray(vertices) || vertices.length < 3 || vertices.length > 220) {
+    throw new Error('Выпуклый отсекатель должен содержать от 3 до 220 вершин.');
+  }
+  for (const v of vertices) if (!Number.isFinite(v.x) || !Number.isFinite(v.y)) {
+    throw new Error('Координаты вершин должны быть конечными числами.');
+  }
+  const twiceArea = signedDoubleArea(vertices);
+  if (Math.abs(twiceArea) <= EPS * EPS) throw new Error('Площадь выпуклого отсекателя равна нулю.');
+  const orientation = twiceArea > 0 ? 1 : -1;
+  for (let i = 0; i < vertices.length; i++) {
+    const a = vertices[i], b = vertices[(i + 1) % vertices.length];
+    const ex = b.x - a.x, ey = b.y - a.y;
+    const length = Math.hypot(ex, ey);
+    if (length <= EPS) throw new Error('У отсекателя есть совпадающие вершины или слишком короткое ребро.');
+    for (let j = 0; j < vertices.length; j++) {
+      const v = vertices[j];
+      const signed = orientation * cross(ex, ey, v.x - a.x, v.y - a.y);
+      if (signed < -EPS * length) throw new Error('Для варианта 10 отсекатель должен быть выпуклым и без самопересечений.');
+    }
+  }
+  return orientation;
+}
+
+// Cyrus-Beck: intersect the parameter interval with each convex half-plane.
+function clipCyrusBeck(x1, y1, x2, y2, vertices, stats = null, orientation = undefined) {
+  const sign = orientation ?? convexOrientation(vertices);
+  const dx = x2 - x1, dy = y2 - y1;
+  let t0 = 0, t1 = 1;
+  for (let i = 0; i < vertices.length; i++) {
+    const a = vertices[i], b = vertices[(i + 1) % vertices.length];
+    const ex = b.x - a.x, ey = b.y - a.y;
+    const edgeLength = Math.hypot(ex, ey);
+    const q = sign * (mult(ex, y1 - a.y, stats) - mult(ey, x1 - a.x, stats)) + EPS * edgeLength;
+    const p = sign * (mult(ex, dy, stats) - mult(ey, dx, stats));
+    const tolerance = machineTolerance(q, p) * 0.25;
+    if (Math.abs(p) <= tolerance) {
+      if (q < -tolerance) return null;
+      continue;
+    }
+    const t = divide(-q, p, stats);
+    if (p > 0) t0 = Math.max(t0, t);
+    else t1 = Math.min(t1, t);
+    if (t0 > t1 + machineTolerance(t0, t1)) return null;
+  }
+  if (t0 > t1) t0 = t1 = (t0 + t1) / 2;
+  const a = t0 <= 0 ? [x1, y1] : interpolate(x1, y1, dx, dy, t0, stats);
+  const b = t1 >= 1 ? [x2, y2] : interpolate(x1, y1, dx, dy, t1, stats);
+  return [a[0], a[1], b[0], b[1]];
+}
+
+function equivalentSegments(a, b, eps = 2e-6) {
+  if (a === null || b === null) return a === b;
+  return a.length === 4 && b.length === 4 && a.every((n, i) => Math.abs(n - b[i]) <= eps);
+}
+function parseSegments(text) {
+  const rows = text.split(/\r?\n/).map((line) => line.replace(/#.*/, '').trim()).filter(Boolean);
+  if (!rows.length) throw new Error('Входной файл пуст.');
+  const n = Number(rows[0]);
+  if (!Number.isSafeInteger(n) || n < 0 || n > 2000000) throw new Error('В первой строке ожидается целое число отрезков n от 0 до 2000000.');
+  if (rows.length !== n + 2) throw new Error(`Ожидается ${n + 2} непустых строк, получено ${rows.length}.`);
+  const parse = (row, expected) => {
+    const values = row.replace(/,/g, '.').split(/\s+/).map(Number);
+    if (values.length !== expected || !values.every(Number.isFinite)) throw new Error(`Неверные координаты: «${row}».`);
+    return values;
+  };
+  const segments = [];
+  for (let i = 1; i <= n; i++) segments.push(parse(rows[i], 4));
+  const [xmin, ymin, xmax, ymax] = parse(rows[n + 1], 4);
+  return { segments, window: rect(xmin, ymin, xmax, ymax) };
+}
+function serializeSegments(segments, r) {
+  const fmt = (n) => String(Number(Number(n).toPrecision(15)));
+  return `${segments.length}\n${segments.map((s) => s.map(fmt).join(' ')).join('\n')}\n${[r.xmin, r.ymin, r.xmax, r.ymax].map(fmt).join(' ')}\n`;
+}
+
+
+
+function node(xmin, ymin, xmax, ymax, depth) {
+  return { xmin, ymin, xmax, ymax, depth, items: [], children: null };
+}
+class Quadtree {
+  constructor(data, bounds, { maxDepth = 8, capacity = 24 } = {}) {
+    if (!(data instanceof Float32Array || data instanceof Float64Array) || data.length % 4 !== 0) {
+      throw new Error('Quadtree expects a packed array of segments.');
+    }
+    if (!Number.isInteger(maxDepth) || maxDepth < 0 || maxDepth > 14) throw new Error('Invalid tree depth.');
+    this.data = data;
+    this.root = node(bounds.xmin, bounds.ymin, bounds.xmax, bounds.ymax, 0);
+    this.maxDepth = maxDepth;
+    this.capacity = capacity;
+    this.nodes = 1;
+    this.items = data.length / 4;
+    for (let i = 0; i < data.length; i += 4) this.insert(this.root, i);
+  }
+  getBounds(i) {
+    const d = this.data;
+    return { xmin: Math.min(d[i], d[i + 2]), ymin: Math.min(d[i + 1], d[i + 3]),
+      xmax: Math.max(d[i], d[i + 2]), ymax: Math.max(d[i + 1], d[i + 3]) };
+  }
+  childIndex(n, a) {
+    const mx = (n.xmin + n.xmax) / 2;
+    const my = (n.ymin + n.ymax) / 2;
+    let h;
+    let v;
+    if (a.xmax <= mx - EPS) h = 0;
+    else if (a.xmin >= mx + EPS) h = 1;
+    else return -1;
+    if (a.ymax <= my - EPS) v = 0;
+    else if (a.ymin >= my + EPS) v = 1;
+    else return -1;
+    return v * 2 + h;
+  }
+  subdivide(n) {
+    const mx = (n.xmin + n.xmax) / 2;
+    const my = (n.ymin + n.ymax) / 2;
+    const d = n.depth + 1;
+    n.children = [node(n.xmin, n.ymin, mx, my, d), node(mx, n.ymin, n.xmax, my, d),
+      node(n.xmin, my, mx, n.ymax, d), node(mx, my, n.xmax, n.ymax, d)];
+    this.nodes += 4;
+    const items = n.items;
+    n.items = [];
+    for (const index of items) this.insert(n, index);
+  }
+  insert(n, index) {
+    if (n.children) {
+      const which = this.childIndex(n, this.getBounds(index));
+      if (which !== -1) { this.insert(n.children[which], index); return; }
+    }
+    n.items.push(index);
+    if (!n.children && n.depth < this.maxDepth && n.items.length > this.capacity) this.subdivide(n);
+  }
+  query(r, visitor) {
+    let nodesVisited = 0;
+    let candidates = 0;
+    const walk = (n) => {
+      if (!boundsIntersect(n, r)) return;
+      nodesVisited++;
+      for (const i of n.items) { candidates++; visitor(i); }
+      if (n.children) for (const child of n.children) walk(child);
+    };
+    walk(this.root);
+    return { nodesVisited, candidates };
+  }
+}
+
+
+function seededRandom(seed = 2026) {
+  let state = seed >>> 0;
+  return () => {
+    state += 0x6D2B79F5;
+    let t = state;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+const DATA_BOUNDS = { xmin: -512, ymin: -512, xmax: 512, ymax: 512 };
+function makeDataset(count = 500000, density = 1, seed = 2026) {
+  if (!Number.isInteger(count) || count < 0 || count > 1000000) throw new Error('Invalid dataset size.');
+  if (!Number.isFinite(density) || density < 0.1 || density > 12) throw new Error('Invalid density.');
+  const random = seededRandom(seed);
+  const data = new Float64Array(count * 4);
+  const range = 475 / Math.sqrt(density);
+  for (let i = 0; i < count; i++) {
+    let x = (random() * 2 - 1) * range;
+    let y = (random() * 2 - 1) * range;
+    const length = 1 + random() * 11;
+    const angle = random() * Math.PI * 2;
+    const dx = Math.cos(angle) * length;
+    const dy = Math.sin(angle) * length;
+    const j = i * 4;
+    data[j] = Math.max(-510, Math.min(510, x));
+    data[j + 1] = Math.max(-510, Math.min(510, y));
+    data[j + 2] = Math.max(-510, Math.min(510, x + dx));
+    data[j + 3] = Math.max(-510, Math.min(510, y + dy));
+  }
+  return data;
+}
+
+
+
+function polygonArea(ring) {
+  let sum = 0;
+  for (let i = 0; i < ring.length; i++) {
+    const a = ring[i], b = ring[(i + 1) % ring.length];
+    sum += a.x * b.y - b.x * a.y;
+  }
+  return sum / 2;
+}
+function same(a, b) { return Math.abs(a.x - b.x) <= EPS && Math.abs(a.y - b.y) <= EPS; }
+function cross(ax, ay, bx, by) { return ax * by - ay * bx; }
+function onSegment(p, a, b) {
+  const vx = b.x - a.x, vy = b.y - a.y;
+  const wx = p.x - a.x, wy = p.y - a.y;
+  const scale = Math.max(1, Math.hypot(vx, vy));
+  return Math.abs(cross(vx, vy, wx, wy)) <= EPS * scale &&
+    p.x >= Math.min(a.x, b.x) - EPS && p.x <= Math.max(a.x, b.x) + EPS &&
+    p.y >= Math.min(a.y, b.y) - EPS && p.y <= Math.max(a.y, b.y) + EPS;
+}
+function insideEvenOdd(p, rings, boundaryIsInside = true) {
+  let inside = false;
+  for (const ring of rings) {
+    for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+      const a = ring[i], b = ring[j];
+      if (onSegment(p, a, b)) return boundaryIsInside;
+      if ((a.y > p.y + EPS) !== (b.y > p.y + EPS)) {
+        const x = (b.x - a.x) * (p.y - a.y) / (b.y - a.y) + a.x;
+        if (x > p.x + EPS) inside = !inside;
+      }
+    }
+  }
+  return inside;
+}
+function parseRings(text) {
+  const rings = text.trim().split(/\n\s*\n|\s*\|\s*/).map((chunk) => {
+    const rows = chunk.trim().split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+    const pts = rows.map((line) => {
+      const nums = line.replace(/,/g, '.').split(/\s+/).map(Number);
+      if (nums.length !== 2 || !nums.every(Number.isFinite)) throw new Error(`Неверная вершина «${line}». Ожидается X Y.`);
+      return { x: nums[0], y: nums[1] };
+    });
+    if (pts.length > 1 && same(pts[0], pts.at(-1))) pts.pop();
+    return pts.filter((p, i) => i === 0 || !same(p, pts[i - 1]));
+  });
+  if (!rings.length || rings.some((ring) => ring.length < 3)) throw new Error('Каждый контур должен иметь минимум 3 вершины. Отделяйте контуры пустой строкой.');
+  if (rings.reduce((sum, ring) => sum + ring.length, 0) > 220) throw new Error('Максимум 220 вершин для интерактивного режима.');
+  return rings;
+}
+function rectangleRing(r) {
+  return [{ x: r.xmin, y: r.ymin }, { x: r.xmax, y: r.ymin },
+    { x: r.xmax, y: r.ymax }, { x: r.xmin, y: r.ymax }];
+}
+function addCut(edge, t) {
+  if (Number.isFinite(t) && t >= -EPS && t <= 1 + EPS) edge.cuts.push(Math.max(0, Math.min(1, t)));
+}
+function position(edge, t) {
+  return { x: edge.a.x + (edge.b.x - edge.a.x) * t,
+    y: edge.a.y + (edge.b.y - edge.a.y) * t };
+}
+function projection(p, edge) {
+  const dx = edge.b.x - edge.a.x, dy = edge.b.y - edge.a.y;
+  const denom = dx * dx + dy * dy;
+  if (denom <= EPS * EPS) return 0;
+  return ((p.x - edge.a.x) * dx + (p.y - edge.a.y) * dy) / denom;
+}
+function splitIntersections(a, b) {
+  const rx = a.b.x - a.a.x, ry = a.b.y - a.a.y;
+  const sx = b.b.x - b.a.x, sy = b.b.y - b.a.y;
+  const dx = b.a.x - a.a.x, dy = b.a.y - a.a.y;
+  const denom = cross(rx, ry, sx, sy);
+  const scale = Math.max(1, Math.hypot(rx, ry), Math.hypot(sx, sy));
+  if (Math.abs(denom) > EPS * scale) {
+    const t = cross(dx, dy, sx, sy) / denom;
+    const u = cross(dx, dy, rx, ry) / denom;
+    if (t >= -EPS && t <= 1 + EPS && u >= -EPS && u <= 1 + EPS) {
+      addCut(a, t); addCut(b, u);
+    }
+    return;
+  }
+  if (Math.abs(cross(rx, ry, dx, dy)) > EPS * scale) return;
+  if (onSegment(b.a, a.a, a.b)) { addCut(a, projection(b.a, a)); addCut(b, 0); }
+  if (onSegment(b.b, a.a, a.b)) { addCut(a, projection(b.b, a)); addCut(b, 1); }
+  if (onSegment(a.a, b.a, b.b)) { addCut(b, projection(a.a, b)); addCut(a, 0); }
+  if (onSegment(a.b, b.a, b.b)) { addCut(b, projection(a.b, b)); addCut(a, 1); }
+}
+function pointToSegmentDistance(p, a, b) {
+  const dx = b.x - a.x, dy = b.y - a.y;
+  const length2 = dx * dx + dy * dy;
+  if (length2 <= EPS * EPS) return Math.hypot(p.x - a.x, p.y - a.y);
+  const t = Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / length2));
+  return Math.hypot(p.x - a.x - t * dx, p.y - a.y - t * dy);
+}
+function sampleOffset(mid, edge, edges, length) {
+  let gap = Infinity;
+  for (const other of edges) {
+    if (other === edge || same(other.a, edge.a) || same(other.a, edge.b) ||
+        same(other.b, edge.a) || same(other.b, edge.b)) continue;
+    const distance = pointToSegmentDistance(mid, other.a, other.b);
+    if (distance > EPS * 2) gap = Math.min(gap, distance);
+  }
+  return Math.min(Math.max(EPS * 2.1, Math.min(1e-5, length * 0.1)), gap * 0.35);
+}
+function makeEdges(rings, kind) {
+  const edges = [];
+  for (const ring of rings) for (let i = 0; i < ring.length; i++) {
+    const a = ring[i], b = ring[(i + 1) % ring.length];
+    if (!same(a, b)) edges.push({ a, b, kind, cuts: [0, 1] });
+  }
+  return edges;
+}
+
+/** Edge-graph polygon intersection; supports concavity, multiple contours, even-odd holes and self-crossings. */
+function clipPolygonGraph(rings, clipRing) {
+  const edges = [...makeEdges(rings, 'subject'), ...makeEdges([clipRing], 'clip')];
+  for (let i = 0; i < edges.length; i++) for (let j = i + 1; j < edges.length; j++) {
+    const a = edges[i], b = edges[j];
+    if (Math.max(a.a.x, a.b.x) < Math.min(b.a.x, b.b.x) - EPS ||
+        Math.max(b.a.x, b.b.x) < Math.min(a.a.x, a.b.x) - EPS ||
+        Math.max(a.a.y, a.b.y) < Math.min(b.a.y, b.b.y) - EPS ||
+        Math.max(b.a.y, b.b.y) < Math.min(a.a.y, a.b.y) - EPS) continue;
+    splitIntersections(a, b);
+  }
+  const nodes = new Map();
+  const links = new Map();
+  const snapped = (p) => {
+    const key = `${Math.round(p.x / EPS)}:${Math.round(p.y / EPS)}`;
+    if (!nodes.has(key)) nodes.set(key, { key, x: p.x, y: p.y, outgoing: [] });
+    return nodes.get(key);
+  };
+  for (const edge of edges) {
+    const totalLength = Math.hypot(edge.b.x - edge.a.x, edge.b.y - edge.a.y);
+    const paramTolerance = EPS / Math.max(totalLength, EPS);
+    edge.cuts.sort((a, b) => a - b);
+    const cuts = edge.cuts.filter((t, i) => i === 0 || t - edge.cuts[i - 1] > paramTolerance);
+    for (let i = 0; i < cuts.length - 1; i++) {
+      const a = position(edge, cuts[i]), b = position(edge, cuts[i + 1]);
+      const len = Math.hypot(b.x - a.x, b.y - a.y);
+      if (len < EPS * 2) continue;
+      const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+      const offset = sampleOffset({ x: mx, y: my }, edge, edges, len);
+      const nx = -(b.y - a.y) / len * offset;
+      const ny = (b.x - a.x) / len * offset;
+      const inside = (x, y) => insideEvenOdd({ x, y }, rings, false) && insideEvenOdd({ x, y }, [clipRing], false);
+      const left = inside(mx + nx, my + ny);
+      const right = inside(mx - nx, my - ny);
+      if (left === right) continue;
+      const start = snapped(left ? a : b);
+      const end = snapped(left ? b : a);
+      if (start === end) continue;
+      const key = `${start.key}>${end.key}`;
+      if (links.has(key)) continue;
+      const link = { start, end, used: false, angle: Math.atan2(end.y - start.y, end.x - start.x) };
+      links.set(key, link);
+      start.outgoing.push(link);
+    }
+  }
+  const ringsOut = [];
+  const maxSteps = links.size + 1;
+  const TAU = 2 * Math.PI;
+  for (const link of links.values()) {
+    if (link.used) continue;
+    let current = link;
+    const loop = [];
+    let closed = false;
+    for (let step = 0; step < maxSteps; step++) {
+      if (current.used) break;
+      current.used = true;
+      loop.push({ x: current.start.x, y: current.start.y });
+      const vertex = current.end;
+      if (vertex === link.start) { closed = true; break; }
+      const backwards = Math.atan2(current.start.y - vertex.y, current.start.x - vertex.x);
+      let next = null, best = Infinity;
+      for (const option of vertex.outgoing) {
+        if (option.used) continue;
+        let clockwise = ((backwards - option.angle) % TAU + TAU) % TAU;
+        if (clockwise < EPS) clockwise = TAU;
+        if (clockwise < best) { best = clockwise; next = option; }
+      }
+      if (!next) break;
+      current = next;
+    }
+    if (closed && loop.length >= 3 && Math.abs(polygonArea(loop)) > EPS * EPS) ringsOut.push(loop);
+  }
+  return ringsOut;
+}
+
+function properIntersection(a, b, c, d) {
+  const rx = b.x - a.x, ry = b.y - a.y;
+  const sx = d.x - c.x, sy = d.y - c.y;
+  const denominator = cross(rx, ry, sx, sy);
+  const scale = Math.max(1, Math.hypot(rx, ry), Math.hypot(sx, sy));
+  if (Math.abs(denominator) <= EPS * scale) {
+    if (Math.abs(cross(rx, ry, c.x - a.x, c.y - a.y)) <= EPS * scale &&
+        (onSegment(c, a, b) || onSegment(d, a, b) || onSegment(a, c, d) || onSegment(b, c, d))) return 'overlap';
+    return null;
+  }
+  const t = cross(c.x - a.x, c.y - a.y, sx, sy) / denominator;
+  const u = cross(c.x - a.x, c.y - a.y, rx, ry) / denominator;
+  if (t < -EPS || t > 1 + EPS || u < -EPS || u > 1 + EPS) return null;
+  if (t <= EPS || t >= 1 - EPS || u <= EPS || u >= 1 - EPS) return 'touch';
+  return { t, u, x: a.x + rx * t, y: a.y + ry * t };
+}
+function isSimpleRing(ring) {
+  if (ring.length < 3 || Math.abs(polygonArea(ring)) <= EPS * EPS) return false;
+  for (let i = 0; i < ring.length; i++) for (let j = i + 1; j < ring.length; j++) {
+    if (j === i + 1 || (i === 0 && j === ring.length - 1)) continue;
+    if (properIntersection(ring[i], ring[(i + 1) % ring.length], ring[j], ring[(j + 1) % ring.length])) return false;
+  }
+  return true;
+}
+
+function clipWeilerAthertonSimple(subject, windowRing) {
+  if (!isSimpleRing(subject) || !isSimpleRing(windowRing)) return null;
+  const s = polygonArea(subject) > 0 ? [...subject] : [...subject].reverse();
+  const c = polygonArea(windowRing) > 0 ? [...windowRing] : [...windowRing].reverse();
+  const sEvents = Array.from({ length: s.length }, () => []);
+  const cEvents = Array.from({ length: c.length }, () => []);
+  const events = [];
+  for (let i = 0; i < s.length; i++) for (let j = 0; j < c.length; j++) {
+    const hit = properIntersection(s[i], s[(i + 1) % s.length], c[j], c[(j + 1) % c.length]);
+    if (hit === 'overlap' || hit === 'touch') return null;
+    if (!hit) continue;
+    const sourceNode = { x: hit.x, y: hit.y, isIntersection: true, mate: null, next: null, entry: false, visited: false };
+    const clipNode = { x: hit.x, y: hit.y, isIntersection: true, mate: sourceNode, next: null };
+    sourceNode.mate = clipNode;
+    const event = { t: hit.t, u: hit.u, sourceNode, clipNode };
+    sEvents[i].push(event);
+    cEvents[j].push(event);
+    events.push(event);
+  }
+  if (!events.length) return null;
+  const sourceNodes = s.map((p) => ({ ...p, isIntersection: false, next: null }));
+  const clipNodes = c.map((p) => ({ ...p, isIntersection: false, next: null }));
+  for (let i = 0; i < s.length; i++) {
+    const list = sEvents[i].sort((a, b) => a.t - b.t);
+    let previous = sourceNodes[i];
+    for (const event of list) { previous.next = event.sourceNode; previous = event.sourceNode; }
+    previous.next = sourceNodes[(i + 1) % s.length];
+  }
+  for (let i = 0; i < c.length; i++) {
+    const list = cEvents[i].sort((a, b) => a.u - b.u);
+    let previous = clipNodes[i];
+    for (const event of list) { previous.next = event.clipNode; previous = event.clipNode; }
+    previous.next = clipNodes[(i + 1) % c.length];
+  }
+  for (const event of events) {
+    const n = event.sourceNode;
+    const pair = sEvents.findIndex((list) => list.includes(event));
+    const a = s[pair], b = s[(pair + 1) % s.length];
+    const length = Math.hypot(b.x - a.x, b.y - a.y);
+    const step = Math.min(0.0001, length * Math.min(event.t, 1 - event.t) * 0.1);
+    const sx = (b.x - a.x) / length * step;
+    const sy = (b.y - a.y) / length * step;
+    const wasInside = insideEvenOdd({ x: n.x - sx, y: n.y - sy }, [c], false);
+    const nowInside = insideEvenOdd({ x: n.x + sx, y: n.y + sy }, [c], false);
+    if (wasInside === nowInside) return null;
+    n.entry = !wasInside && nowInside;
+  }
+  const result = [];
+  const limit = s.length + c.length + events.length * 4 + 5;
+  for (const entryEvent of events.filter((event) => event.sourceNode.entry)) {
+    const start = entryEvent.sourceNode;
+    if (start.visited) continue;
+    let node = start;
+    let side = 'subject';
+    const ring = [];
+    let closed = false;
+    for (let i = 0; i < limit; i++) {
+      if (node === start && ring.length) { closed = true; break; }
+      ring.push({ x: node.x, y: node.y });
+      if (node.isIntersection) {
+        if (side === 'subject') {
+          if (node.entry) node.visited = true;
+          else { node = node.mate; side = 'clip'; }
+        } else if (node.mate.entry) { node = node.mate; side = 'subject'; node.visited = true; }
+      }
+      if (node === start && ring.length > 1) { closed = true; break; }
+      node = node.next;
+    }
+    if (!closed || ring.length < 3) return null;
+    if (ring.length > 1 && same(ring[0], ring.at(-1))) ring.pop();
+    if (ring.length >= 3 && Math.abs(polygonArea(ring)) > EPS * EPS) result.push(ring);
+  }
+  return result.length ? result : null;
+}
+
+function clipPolygon(rings, clipRing) {
+  if (rings.length === 1) {
+    const straightforward = clipWeilerAthertonSimple(rings[0], clipRing);
+    if (straightforward !== null) return straightforward;
+  }
+  return clipPolygonGraph(rings, clipRing);
+}
+
+
+
+
+
+function scanSegments(data, r, algorithm = 'liang', { tree = null, maxVisible = Infinity, renderMargin = 0, motionTime = null, motionAmplitude = 0 } = {}) {
+  const fn = algorithm === 'cohen' ? clipCohen : clipLiang;
+  let scanned = 0, prefiltered = 0, visible = 0, stored = 0, differences = 0;
+  const arithmetic = newOps();
+  const output = [];
+  const padding = renderMargin + (motionTime === null ? 0 : motionAmplitude);
+  const searchRect = padding > 0 ? { xmin: r.xmin - padding, ymin: r.ymin - padding,
+    xmax: r.xmax + padding, ymax: r.ymax + padding } : r;
+  const scan = (i) => {
+    scanned++;
+    let x1 = data[i], y1 = data[i + 1], x2 = data[i + 2], y2 = data[i + 3];
+    if (aabbMask(x1, y1, x2, y2, searchRect)) { prefiltered++; return; }
+    if (motionTime !== null && motionAmplitude > 0) {
+      const phase = (i / 4) * 0.0713;
+      const sx = motionAmplitude * Math.sin(motionTime * 0.00047 + phase);
+      const sy = motionAmplitude * Math.cos(motionTime * 0.00061 + phase * 1.33);
+      x1 += sx; x2 += sx; y1 += sy; y2 += sy;
+    }
+    if (renderMargin > 0 && stored < maxVisible) { output.push(x1, y1, x2, y2); stored++; }
+    if (aabbMask(x1, y1, x2, y2, r)) return;
+    const clipped = fn(x1, y1, x2, y2, r, arithmetic);
+    if (clipped) {
+      visible++;
+      if (renderMargin <= 0 && stored < maxVisible) { output.push(...clipped); stored++; }
+    }
+  };
+  let query = { nodesVisited: 0, candidates: data.length / 4 };
+  if (tree) query = tree.query(searchRect, scan);
+  else for (let i = 0; i < data.length; i += 4) scan(i);
+  return { output: renderMargin > 0 ? Float32Array.from(output) : Float64Array.from(output), scanned, prefiltered, visible, stored,
+    arithmetic, treeNodesVisited: query.nodesVisited, candidates: query.candidates, differences };
+}
+function compareAlgorithms(data, r, {motionTime = null, motionAmplitude = 0} = {}) {
+  const cohen = newOps(), liang = newOps();
+  let visible = 0, mismatch = 0, fastRejected = 0;
+  for (let i = 0; i < data.length; i += 4) {
+    let x1 = data[i], y1 = data[i + 1], x2 = data[i + 2], y2 = data[i + 3];
+    if (motionTime !== null && motionAmplitude > 0) {
+      const phase = (i / 4) * 0.0713;
+      const sx = motionAmplitude * Math.sin(motionTime * 0.00047 + phase);
+      const sy = motionAmplitude * Math.cos(motionTime * 0.00061 + phase * 1.33);
+      x1 += sx; x2 += sx; y1 += sy; y2 += sy;
+    }
+    if (aabbMask(x1, y1, x2, y2, r)) { fastRejected++; continue; }
+    const a = clipCohen(x1, y1, x2, y2, r, cohen);
+    const b = clipLiang(x1, y1, x2, y2, r, liang);
+    if (a) visible++;
+    if (!equivalentSegments(a, b)) mismatch++;
+  }
+  return { cohen, liang, visible, mismatch, fastRejected };
+}
+function fullBenchmark({ count = 500000, depths = [0, 4, 6, 8], densities = [0.6, 1, 3], samples = 16, seed = 2026 } = {}, notify = () => {}) {
+  const results = [];
+  const start = performance.now();
+  const scenarios = densities.length * depths.length;
+  let done = 0;
+  for (const density of densities) {
+    const data = makeDataset(count, density, seed);
+    for (const depth of depths) {
+      const buildStart = performance.now();
+      const tree = depth ? new Quadtree(data, DATA_BOUNDS, { maxDepth: depth }) : null;
+      const buildMs = performance.now() - buildStart;
+      const timings = [];
+      const visibleCounts = [];
+      let tested = 0;
+      for (let i = 0; i < samples; i++) {
+        const x = -280 + (560 * i) / Math.max(1, samples - 1);
+        const y = 90 * Math.sin(i * 1.37);
+        const r = { xmin: x - 24, ymin: y - 18, xmax: x + 24, ymax: y + 18 };
+        const t = performance.now();
+        const result = scanSegments(data, r, 'cohen', { tree, maxVisible: 0 });
+        timings.push(performance.now() - t);
+        visibleCounts.push(result.visible);
+        tested += result.scanned;
+      }
+      timings.sort((a, b) => a - b);
+      results.push({ count, density, depth, buildMs, medianMs: timings[Math.floor(timings.length / 2)],
+        p95Ms: timings[Math.min(timings.length - 1, Math.ceil(timings.length * 0.95) - 1)],
+        meanCandidates: tested / samples, meanVisible: visibleCounts.reduce((a, b) => a + b, 0) / samples,
+        nodes: tree?.nodes ?? 0, samples });
+      done++;
+      notify({ done, total: scenarios, density, depth });
+    }
+  }
+  return { meta: { count, depths, densities, samples, seed, elapsedMs: performance.now() - start,
+    algorithm: 'cohen', numericFormat: 'Float64Array', timestamp: new Date().toISOString(), platform: typeof navigator !== 'undefined' ? navigator.userAgent : `Node ${process.version}` }, results };
+}
+
+
+class StressRenderer {
+  constructor(canvas) {
+    this.canvas = canvas;
+    this.gl = canvas.getContext('webgl2', { alpha: true, antialias: false, premultipliedAlpha: false });
+    if (!this.gl) throw new Error('WebGL2 is not available.');
+    const gl = this.gl;
+    const vertex = `#version 300 es
+    in vec2 a_position;
+    uniform vec2 u_center;
+    uniform vec2 u_size;
+    uniform vec2 u_shift;
+    uniform float u_scale;
+    void main() {
+      vec2 p = (a_position + u_shift - u_center) * u_scale;
+      gl_Position = vec4(2.0 * p.x / u_size.x, 2.0 * p.y / u_size.y, 0.0, 1.0);
+    }`;
+    const fragment = `#version 300 es
+    precision mediump float;
+    out vec4 fragColor;
+    void main() { fragColor = vec4(0.067, 0.584, 0.427, 0.98); }`;
+    const shader = (type, source) => {
+      const handle = gl.createShader(type);
+      gl.shaderSource(handle, source); gl.compileShader(handle);
+      if (!gl.getShaderParameter(handle, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(handle));
+      return handle;
+    };
+    this.program = gl.createProgram();
+    gl.attachShader(this.program, shader(gl.VERTEX_SHADER, vertex));
+    gl.attachShader(this.program, shader(gl.FRAGMENT_SHADER, fragment));
+    gl.linkProgram(this.program);
+    if (!gl.getProgramParameter(this.program, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(this.program));
+    this.buffer = gl.createBuffer();
+    this.vao = gl.createVertexArray();
+    gl.bindVertexArray(this.vao);
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+    const index = gl.getAttribLocation(this.program, 'a_position');
+    gl.enableVertexAttribArray(index);
+    gl.vertexAttribPointer(index, 2, gl.FLOAT, false, 0, 0);
+    this.uniforms = Object.fromEntries(['u_center', 'u_size', 'u_shift', 'u_scale']
+      .map(name => [name, gl.getUniformLocation(this.program, name)]));
+    this.vertices = 0;
+  }
+  upload(packed) {
+    const gl = this.gl;
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+    const input = packed instanceof Float32Array ? packed : Float32Array.from(packed);
+    gl.bufferData(gl.ARRAY_BUFFER, input, gl.DYNAMIC_DRAW);
+    this.vertices = input.length / 2;
+  }
+  draw(camera, width, height, ratio, r, shift) {
+    const gl = this.gl;
+    gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+    gl.clearColor(0, 0, 0, 0);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    if (!this.vertices) return;
+    const left = Math.max(0, Math.floor(((r.xmin - camera.x) * camera.scale + width / 2) * ratio));
+    const right = Math.min(this.canvas.width, Math.ceil(((r.xmax - camera.x) * camera.scale + width / 2) * ratio));
+    const bottom = Math.max(0, Math.floor(((r.ymin - camera.y) * camera.scale + height / 2) * ratio));
+    const top = Math.min(this.canvas.height, Math.ceil(((r.ymax - camera.y) * camera.scale + height / 2) * ratio));
+    if (right <= left || top <= bottom) return;
+    gl.enable(gl.SCISSOR_TEST);
+    gl.scissor(left, bottom, right - left, top - bottom);
+    gl.useProgram(this.program);
+    gl.bindVertexArray(this.vao);
+    gl.uniform2f(this.uniforms.u_center, camera.x, camera.y);
+    gl.uniform2f(this.uniforms.u_size, width, height);
+    gl.uniform2f(this.uniforms.u_shift, shift.x, shift.y);
+    gl.uniform1f(this.uniforms.u_scale, camera.scale);
+    gl.drawArrays(gl.LINES, 0, this.vertices);
+    gl.disable(gl.SCISSOR_TEST);
+  }
+}
+
+const INLINE_WORKER_SOURCE = "const EPS = 1e-7;\nconst OUT_LEFT = 1;\nconst OUT_RIGHT = 2;\nconst OUT_BOTTOM = 4;\nconst OUT_TOP = 8;\n\nfunction near(a, b, tolerance = EPS) { return Math.abs(a - b) <= tolerance; }\nfunction point(x, y) { return { x, y }; }\nfunction rect(xmin, ymin, xmax, ymax) {\n  if (![xmin, ymin, xmax, ymax].every(Number.isFinite) || xmin >= xmax - EPS || ymin >= ymax - EPS) {\n    throw new Error('Для окна необходимы конечные координаты xmin < xmax и ymin < ymax.');\n  }\n  return { xmin, ymin, xmax, ymax };\n}\nfunction outcode(x, y, r) {\n  let code = 0;\n  if (x < r.xmin - EPS) code |= OUT_LEFT;\n  if (x > r.xmax + EPS) code |= OUT_RIGHT;\n  if (y < r.ymin - EPS) code |= OUT_BOTTOM;\n  if (y > r.ymax + EPS) code |= OUT_TOP;\n  return code;\n}\nfunction inRect(x, y, r) { return outcode(x, y, r) === 0; }\nfunction aabbMask(x1, y1, x2, y2, r) {\n  let mask = 0;\n  if (Math.max(x1, x2) < r.xmin - EPS) mask |= OUT_LEFT;\n  if (Math.min(x1, x2) > r.xmax + EPS) mask |= OUT_RIGHT;\n  if (Math.max(y1, y2) < r.ymin - EPS) mask |= OUT_BOTTOM;\n  if (Math.min(y1, y2) > r.ymax + EPS) mask |= OUT_TOP;\n  return mask;\n}\nfunction boundsIntersect(a, b) {\n  return !(a.xmax < b.xmin - EPS || a.xmin > b.xmax + EPS ||\n    a.ymax < b.ymin - EPS || a.ymin > b.ymax + EPS);\n}\nfunction mult(a, b, stats) { if (stats) stats.mul++; return a * b; }\nfunction divide(a, b, stats) { if (stats) stats.div++; return a / b; }\nfunction newOps() { return { mul: 0, div: 0 }; }\nfunction interpolate(x1, y1, dx, dy, t, stats) {\n  return [x1 + mult(dx, t, stats), y1 + mult(dy, t, stats)];\n}\nfunction machineTolerance(...values) {\n  return Number.EPSILON * Math.max(1, ...values.map(Math.abs)) * 4;\n}\n\n// The epsilon-expanded closed window is shared by both independent algorithms.\n// Consequently, tolerance never moves the intersection behind an endpoint.\nfunction clipCohen(x1, y1, x2, y2, r, stats = null) {\n  let c1 = outcode(x1, y1, r), c2 = outcode(x2, y2, r);\n  const left = r.xmin - EPS, right = r.xmax + EPS;\n  const bottom = r.ymin - EPS, top = r.ymax + EPS;\n  for (let iteration = 0; iteration < 9; iteration++) {\n    if ((c1 | c2) === 0) return [x1, y1, x2, y2];\n    if ((c1 & c2) !== 0) return null;\n    const outside = c1 !== 0 ? c1 : c2;\n    let x, y;\n    if (outside & (OUT_TOP | OUT_BOTTOM)) {\n      const border = (outside & OUT_TOP) ? top : bottom;\n      const dy = y2 - y1;\n      if (Math.abs(dy) <= machineTolerance(y1, y2) && (c1 & c2)) return null;\n      const t = divide(border - y1, dy, stats);\n      x = x1 + mult(x2 - x1, t, stats);\n      y = border;\n    } else {\n      const border = (outside & OUT_RIGHT) ? right : left;\n      const dx = x2 - x1;\n      if (Math.abs(dx) <= machineTolerance(x1, x2) && (c1 & c2)) return null;\n      const t = divide(border - x1, dx, stats);\n      x = border;\n      y = y1 + mult(y2 - y1, t, stats);\n    }\n    if (!Number.isFinite(x) || !Number.isFinite(y)) return null;\n    if (outside === c1) {\n      x1 = x; y1 = y; c1 = outcode(x1, y1, r);\n    } else {\n      x2 = x; y2 = y; c2 = outcode(x2, y2, r);\n    }\n  }\n  return null;\n}\n\nfunction clipLiang(x1, y1, x2, y2, r, stats = null) {\n  const dx = x2 - x1, dy = y2 - y1;\n  if (Math.abs(dx) <= machineTolerance(x1, x2) && Math.abs(dy) <= machineTolerance(y1, y2)) {\n    return inRect(x1, y1, r) ? [x1, y1, x1, y1] : null;\n  }\n  const ps = [-dx, dx, -dy, dy];\n  const qs = [x1 - (r.xmin - EPS), (r.xmax + EPS) - x1,\n    y1 - (r.ymin - EPS), (r.ymax + EPS) - y1];\n  let t0 = 0, t1 = 1;\n  for (let i = 0; i < 4; i++) {\n    const p = ps[i], q = qs[i];\n    const tolerance = machineTolerance(p, q) * 0.25;\n    if (Math.abs(p) <= tolerance) {\n      if (q < -tolerance) return null;\n      continue;\n    }\n    const t = divide(q, p, stats);\n    if (p < 0) t0 = Math.max(t0, t);\n    else t1 = Math.min(t1, t);\n    if (t0 > t1 + machineTolerance(t0, t1)) return null;\n  }\n  if (t0 > t1) t0 = t1 = (t0 + t1) / 2;\n  const a = t0 <= 0 ? [x1, y1] : interpolate(x1, y1, dx, dy, t0, stats);\n  const b = t1 >= 1 ? [x2, y2] : interpolate(x1, y1, dx, dy, t1, stats);\n  return [a[0], a[1], b[0], b[1]];\n}\n\nfunction cross(ax, ay, bx, by) { return ax * by - ay * bx; }\nfunction signedDoubleArea(vertices) {\n  let total = 0;\n  for (let i = 0; i < vertices.length; i++) {\n    const a = vertices[i], b = vertices[(i + 1) % vertices.length];\n    total += a.x * b.y - b.x * a.y;\n  }\n  return total;\n}\nfunction convexOrientation(vertices) {\n  if (!Array.isArray(vertices) || vertices.length < 3 || vertices.length > 220) {\n    throw new Error('Выпуклый отсекатель должен содержать от 3 до 220 вершин.');\n  }\n  for (const v of vertices) if (!Number.isFinite(v.x) || !Number.isFinite(v.y)) {\n    throw new Error('Координаты вершин должны быть конечными числами.');\n  }\n  const twiceArea = signedDoubleArea(vertices);\n  if (Math.abs(twiceArea) <= EPS * EPS) throw new Error('Площадь выпуклого отсекателя равна нулю.');\n  const orientation = twiceArea > 0 ? 1 : -1;\n  for (let i = 0; i < vertices.length; i++) {\n    const a = vertices[i], b = vertices[(i + 1) % vertices.length];\n    const ex = b.x - a.x, ey = b.y - a.y;\n    const length = Math.hypot(ex, ey);\n    if (length <= EPS) throw new Error('У отсекателя есть совпадающие вершины или слишком короткое ребро.');\n    for (let j = 0; j < vertices.length; j++) {\n      const v = vertices[j];\n      const signed = orientation * cross(ex, ey, v.x - a.x, v.y - a.y);\n      if (signed < -EPS * length) throw new Error('Для варианта 10 отсекатель должен быть выпуклым и без самопересечений.');\n    }\n  }\n  return orientation;\n}\n\n// Cyrus-Beck: intersect the parameter interval with each convex half-plane.\nfunction clipCyrusBeck(x1, y1, x2, y2, vertices, stats = null, orientation = undefined) {\n  const sign = orientation ?? convexOrientation(vertices);\n  const dx = x2 - x1, dy = y2 - y1;\n  let t0 = 0, t1 = 1;\n  for (let i = 0; i < vertices.length; i++) {\n    const a = vertices[i], b = vertices[(i + 1) % vertices.length];\n    const ex = b.x - a.x, ey = b.y - a.y;\n    const edgeLength = Math.hypot(ex, ey);\n    const q = sign * (mult(ex, y1 - a.y, stats) - mult(ey, x1 - a.x, stats)) + EPS * edgeLength;\n    const p = sign * (mult(ex, dy, stats) - mult(ey, dx, stats));\n    const tolerance = machineTolerance(q, p) * 0.25;\n    if (Math.abs(p) <= tolerance) {\n      if (q < -tolerance) return null;\n      continue;\n    }\n    const t = divide(-q, p, stats);\n    if (p > 0) t0 = Math.max(t0, t);\n    else t1 = Math.min(t1, t);\n    if (t0 > t1 + machineTolerance(t0, t1)) return null;\n  }\n  if (t0 > t1) t0 = t1 = (t0 + t1) / 2;\n  const a = t0 <= 0 ? [x1, y1] : interpolate(x1, y1, dx, dy, t0, stats);\n  const b = t1 >= 1 ? [x2, y2] : interpolate(x1, y1, dx, dy, t1, stats);\n  return [a[0], a[1], b[0], b[1]];\n}\n\nfunction equivalentSegments(a, b, eps = 2e-6) {\n  if (a === null || b === null) return a === b;\n  return a.length === 4 && b.length === 4 && a.every((n, i) => Math.abs(n - b[i]) <= eps);\n}\nfunction parseSegments(text) {\n  const rows = text.split(/\\r?\\n/).map((line) => line.replace(/#.*/, '').trim()).filter(Boolean);\n  if (!rows.length) throw new Error('Входной файл пуст.');\n  const n = Number(rows[0]);\n  if (!Number.isSafeInteger(n) || n < 0 || n > 2000000) throw new Error('В первой строке ожидается целое число отрезков n от 0 до 2000000.');\n  if (rows.length !== n + 2) throw new Error(`Ожидается ${n + 2} непустых строк, получено ${rows.length}.`);\n  const parse = (row, expected) => {\n    const values = row.replace(/,/g, '.').split(/\\s+/).map(Number);\n    if (values.length !== expected || !values.every(Number.isFinite)) throw new Error(`Неверные координаты: «${row}».`);\n    return values;\n  };\n  const segments = [];\n  for (let i = 1; i <= n; i++) segments.push(parse(rows[i], 4));\n  const [xmin, ymin, xmax, ymax] = parse(rows[n + 1], 4);\n  return { segments, window: rect(xmin, ymin, xmax, ymax) };\n}\nfunction serializeSegments(segments, r) {\n  const fmt = (n) => String(Number(Number(n).toPrecision(15)));\n  return `${segments.length}\\n${segments.map((s) => s.map(fmt).join(' ')).join('\\n')}\\n${[r.xmin, r.ymin, r.xmax, r.ymax].map(fmt).join(' ')}\\n`;\n}\n\n\n\nfunction node(xmin, ymin, xmax, ymax, depth) {\n  return { xmin, ymin, xmax, ymax, depth, items: [], children: null };\n}\nclass Quadtree {\n  constructor(data, bounds, { maxDepth = 8, capacity = 24 } = {}) {\n    if (!(data instanceof Float32Array || data instanceof Float64Array) || data.length % 4 !== 0) {\n      throw new Error('Quadtree expects a packed array of segments.');\n    }\n    if (!Number.isInteger(maxDepth) || maxDepth < 0 || maxDepth > 14) throw new Error('Invalid tree depth.');\n    this.data = data;\n    this.root = node(bounds.xmin, bounds.ymin, bounds.xmax, bounds.ymax, 0);\n    this.maxDepth = maxDepth;\n    this.capacity = capacity;\n    this.nodes = 1;\n    this.items = data.length / 4;\n    for (let i = 0; i < data.length; i += 4) this.insert(this.root, i);\n  }\n  getBounds(i) {\n    const d = this.data;\n    return { xmin: Math.min(d[i], d[i + 2]), ymin: Math.min(d[i + 1], d[i + 3]),\n      xmax: Math.max(d[i], d[i + 2]), ymax: Math.max(d[i + 1], d[i + 3]) };\n  }\n  childIndex(n, a) {\n    const mx = (n.xmin + n.xmax) / 2;\n    const my = (n.ymin + n.ymax) / 2;\n    let h;\n    let v;\n    if (a.xmax <= mx - EPS) h = 0;\n    else if (a.xmin >= mx + EPS) h = 1;\n    else return -1;\n    if (a.ymax <= my - EPS) v = 0;\n    else if (a.ymin >= my + EPS) v = 1;\n    else return -1;\n    return v * 2 + h;\n  }\n  subdivide(n) {\n    const mx = (n.xmin + n.xmax) / 2;\n    const my = (n.ymin + n.ymax) / 2;\n    const d = n.depth + 1;\n    n.children = [node(n.xmin, n.ymin, mx, my, d), node(mx, n.ymin, n.xmax, my, d),\n      node(n.xmin, my, mx, n.ymax, d), node(mx, my, n.xmax, n.ymax, d)];\n    this.nodes += 4;\n    const items = n.items;\n    n.items = [];\n    for (const index of items) this.insert(n, index);\n  }\n  insert(n, index) {\n    if (n.children) {\n      const which = this.childIndex(n, this.getBounds(index));\n      if (which !== -1) { this.insert(n.children[which], index); return; }\n    }\n    n.items.push(index);\n    if (!n.children && n.depth < this.maxDepth && n.items.length > this.capacity) this.subdivide(n);\n  }\n  query(r, visitor) {\n    let nodesVisited = 0;\n    let candidates = 0;\n    const walk = (n) => {\n      if (!boundsIntersect(n, r)) return;\n      nodesVisited++;\n      for (const i of n.items) { candidates++; visitor(i); }\n      if (n.children) for (const child of n.children) walk(child);\n    };\n    walk(this.root);\n    return { nodesVisited, candidates };\n  }\n}\n\n\nfunction seededRandom(seed = 2026) {\n  let state = seed >>> 0;\n  return () => {\n    state += 0x6D2B79F5;\n    let t = state;\n    t = Math.imul(t ^ (t >>> 15), t | 1);\n    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);\n    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;\n  };\n}\nconst DATA_BOUNDS = { xmin: -512, ymin: -512, xmax: 512, ymax: 512 };\nfunction makeDataset(count = 500000, density = 1, seed = 2026) {\n  if (!Number.isInteger(count) || count < 0 || count > 1000000) throw new Error('Invalid dataset size.');\n  if (!Number.isFinite(density) || density < 0.1 || density > 12) throw new Error('Invalid density.');\n  const random = seededRandom(seed);\n  const data = new Float64Array(count * 4);\n  const range = 475 / Math.sqrt(density);\n  for (let i = 0; i < count; i++) {\n    let x = (random() * 2 - 1) * range;\n    let y = (random() * 2 - 1) * range;\n    const length = 1 + random() * 11;\n    const angle = random() * Math.PI * 2;\n    const dx = Math.cos(angle) * length;\n    const dy = Math.sin(angle) * length;\n    const j = i * 4;\n    data[j] = Math.max(-510, Math.min(510, x));\n    data[j + 1] = Math.max(-510, Math.min(510, y));\n    data[j + 2] = Math.max(-510, Math.min(510, x + dx));\n    data[j + 3] = Math.max(-510, Math.min(510, y + dy));\n  }\n  return data;\n}\n\n\n\nfunction polygonArea(ring) {\n  let sum = 0;\n  for (let i = 0; i < ring.length; i++) {\n    const a = ring[i], b = ring[(i + 1) % ring.length];\n    sum += a.x * b.y - b.x * a.y;\n  }\n  return sum / 2;\n}\nfunction same(a, b) { return Math.abs(a.x - b.x) <= EPS && Math.abs(a.y - b.y) <= EPS; }\nfunction cross(ax, ay, bx, by) { return ax * by - ay * bx; }\nfunction onSegment(p, a, b) {\n  const vx = b.x - a.x, vy = b.y - a.y;\n  const wx = p.x - a.x, wy = p.y - a.y;\n  const scale = Math.max(1, Math.hypot(vx, vy));\n  return Math.abs(cross(vx, vy, wx, wy)) <= EPS * scale &&\n    p.x >= Math.min(a.x, b.x) - EPS && p.x <= Math.max(a.x, b.x) + EPS &&\n    p.y >= Math.min(a.y, b.y) - EPS && p.y <= Math.max(a.y, b.y) + EPS;\n}\nfunction insideEvenOdd(p, rings, boundaryIsInside = true) {\n  let inside = false;\n  for (const ring of rings) {\n    for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {\n      const a = ring[i], b = ring[j];\n      if (onSegment(p, a, b)) return boundaryIsInside;\n      if ((a.y > p.y + EPS) !== (b.y > p.y + EPS)) {\n        const x = (b.x - a.x) * (p.y - a.y) / (b.y - a.y) + a.x;\n        if (x > p.x + EPS) inside = !inside;\n      }\n    }\n  }\n  return inside;\n}\nfunction parseRings(text) {\n  const rings = text.trim().split(/\\n\\s*\\n|\\s*\\|\\s*/).map((chunk) => {\n    const rows = chunk.trim().split(/\\r?\\n/).map((line) => line.trim()).filter(Boolean);\n    const pts = rows.map((line) => {\n      const nums = line.replace(/,/g, '.').split(/\\s+/).map(Number);\n      if (nums.length !== 2 || !nums.every(Number.isFinite)) throw new Error(`Неверная вершина «${line}». Ожидается X Y.`);\n      return { x: nums[0], y: nums[1] };\n    });\n    if (pts.length > 1 && same(pts[0], pts.at(-1))) pts.pop();\n    return pts.filter((p, i) => i === 0 || !same(p, pts[i - 1]));\n  });\n  if (!rings.length || rings.some((ring) => ring.length < 3)) throw new Error('Каждый контур должен иметь минимум 3 вершины. Отделяйте контуры пустой строкой.');\n  if (rings.reduce((sum, ring) => sum + ring.length, 0) > 220) throw new Error('Максимум 220 вершин для интерактивного режима.');\n  return rings;\n}\nfunction rectangleRing(r) {\n  return [{ x: r.xmin, y: r.ymin }, { x: r.xmax, y: r.ymin },\n    { x: r.xmax, y: r.ymax }, { x: r.xmin, y: r.ymax }];\n}\nfunction addCut(edge, t) {\n  if (Number.isFinite(t) && t >= -EPS && t <= 1 + EPS) edge.cuts.push(Math.max(0, Math.min(1, t)));\n}\nfunction position(edge, t) {\n  return { x: edge.a.x + (edge.b.x - edge.a.x) * t,\n    y: edge.a.y + (edge.b.y - edge.a.y) * t };\n}\nfunction projection(p, edge) {\n  const dx = edge.b.x - edge.a.x, dy = edge.b.y - edge.a.y;\n  const denom = dx * dx + dy * dy;\n  if (denom <= EPS * EPS) return 0;\n  return ((p.x - edge.a.x) * dx + (p.y - edge.a.y) * dy) / denom;\n}\nfunction splitIntersections(a, b) {\n  const rx = a.b.x - a.a.x, ry = a.b.y - a.a.y;\n  const sx = b.b.x - b.a.x, sy = b.b.y - b.a.y;\n  const dx = b.a.x - a.a.x, dy = b.a.y - a.a.y;\n  const denom = cross(rx, ry, sx, sy);\n  const scale = Math.max(1, Math.hypot(rx, ry), Math.hypot(sx, sy));\n  if (Math.abs(denom) > EPS * scale) {\n    const t = cross(dx, dy, sx, sy) / denom;\n    const u = cross(dx, dy, rx, ry) / denom;\n    if (t >= -EPS && t <= 1 + EPS && u >= -EPS && u <= 1 + EPS) {\n      addCut(a, t); addCut(b, u);\n    }\n    return;\n  }\n  if (Math.abs(cross(rx, ry, dx, dy)) > EPS * scale) return;\n  if (onSegment(b.a, a.a, a.b)) { addCut(a, projection(b.a, a)); addCut(b, 0); }\n  if (onSegment(b.b, a.a, a.b)) { addCut(a, projection(b.b, a)); addCut(b, 1); }\n  if (onSegment(a.a, b.a, b.b)) { addCut(b, projection(a.a, b)); addCut(a, 0); }\n  if (onSegment(a.b, b.a, b.b)) { addCut(b, projection(a.b, b)); addCut(a, 1); }\n}\nfunction pointToSegmentDistance(p, a, b) {\n  const dx = b.x - a.x, dy = b.y - a.y;\n  const length2 = dx * dx + dy * dy;\n  if (length2 <= EPS * EPS) return Math.hypot(p.x - a.x, p.y - a.y);\n  const t = Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / length2));\n  return Math.hypot(p.x - a.x - t * dx, p.y - a.y - t * dy);\n}\nfunction sampleOffset(mid, edge, edges, length) {\n  let gap = Infinity;\n  for (const other of edges) {\n    if (other === edge || same(other.a, edge.a) || same(other.a, edge.b) ||\n        same(other.b, edge.a) || same(other.b, edge.b)) continue;\n    const distance = pointToSegmentDistance(mid, other.a, other.b);\n    if (distance > EPS * 2) gap = Math.min(gap, distance);\n  }\n  return Math.min(Math.max(EPS * 2.1, Math.min(1e-5, length * 0.1)), gap * 0.35);\n}\nfunction makeEdges(rings, kind) {\n  const edges = [];\n  for (const ring of rings) for (let i = 0; i < ring.length; i++) {\n    const a = ring[i], b = ring[(i + 1) % ring.length];\n    if (!same(a, b)) edges.push({ a, b, kind, cuts: [0, 1] });\n  }\n  return edges;\n}\n\n/** Edge-graph polygon intersection; supports concavity, multiple contours, even-odd holes and self-crossings. */\nfunction clipPolygonGraph(rings, clipRing) {\n  const edges = [...makeEdges(rings, 'subject'), ...makeEdges([clipRing], 'clip')];\n  for (let i = 0; i < edges.length; i++) for (let j = i + 1; j < edges.length; j++) {\n    const a = edges[i], b = edges[j];\n    if (Math.max(a.a.x, a.b.x) < Math.min(b.a.x, b.b.x) - EPS ||\n        Math.max(b.a.x, b.b.x) < Math.min(a.a.x, a.b.x) - EPS ||\n        Math.max(a.a.y, a.b.y) < Math.min(b.a.y, b.b.y) - EPS ||\n        Math.max(b.a.y, b.b.y) < Math.min(a.a.y, a.b.y) - EPS) continue;\n    splitIntersections(a, b);\n  }\n  const nodes = new Map();\n  const links = new Map();\n  const snapped = (p) => {\n    const key = `${Math.round(p.x / EPS)}:${Math.round(p.y / EPS)}`;\n    if (!nodes.has(key)) nodes.set(key, { key, x: p.x, y: p.y, outgoing: [] });\n    return nodes.get(key);\n  };\n  for (const edge of edges) {\n    const totalLength = Math.hypot(edge.b.x - edge.a.x, edge.b.y - edge.a.y);\n    const paramTolerance = EPS / Math.max(totalLength, EPS);\n    edge.cuts.sort((a, b) => a - b);\n    const cuts = edge.cuts.filter((t, i) => i === 0 || t - edge.cuts[i - 1] > paramTolerance);\n    for (let i = 0; i < cuts.length - 1; i++) {\n      const a = position(edge, cuts[i]), b = position(edge, cuts[i + 1]);\n      const len = Math.hypot(b.x - a.x, b.y - a.y);\n      if (len < EPS * 2) continue;\n      const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;\n      const offset = sampleOffset({ x: mx, y: my }, edge, edges, len);\n      const nx = -(b.y - a.y) / len * offset;\n      const ny = (b.x - a.x) / len * offset;\n      const inside = (x, y) => insideEvenOdd({ x, y }, rings, false) && insideEvenOdd({ x, y }, [clipRing], false);\n      const left = inside(mx + nx, my + ny);\n      const right = inside(mx - nx, my - ny);\n      if (left === right) continue;\n      const start = snapped(left ? a : b);\n      const end = snapped(left ? b : a);\n      if (start === end) continue;\n      const key = `${start.key}>${end.key}`;\n      if (links.has(key)) continue;\n      const link = { start, end, used: false, angle: Math.atan2(end.y - start.y, end.x - start.x) };\n      links.set(key, link);\n      start.outgoing.push(link);\n    }\n  }\n  const ringsOut = [];\n  const maxSteps = links.size + 1;\n  const TAU = 2 * Math.PI;\n  for (const link of links.values()) {\n    if (link.used) continue;\n    let current = link;\n    const loop = [];\n    let closed = false;\n    for (let step = 0; step < maxSteps; step++) {\n      if (current.used) break;\n      current.used = true;\n      loop.push({ x: current.start.x, y: current.start.y });\n      const vertex = current.end;\n      if (vertex === link.start) { closed = true; break; }\n      const backwards = Math.atan2(current.start.y - vertex.y, current.start.x - vertex.x);\n      let next = null, best = Infinity;\n      for (const option of vertex.outgoing) {\n        if (option.used) continue;\n        let clockwise = ((backwards - option.angle) % TAU + TAU) % TAU;\n        if (clockwise < EPS) clockwise = TAU;\n        if (clockwise < best) { best = clockwise; next = option; }\n      }\n      if (!next) break;\n      current = next;\n    }\n    if (closed && loop.length >= 3 && Math.abs(polygonArea(loop)) > EPS * EPS) ringsOut.push(loop);\n  }\n  return ringsOut;\n}\n\nfunction properIntersection(a, b, c, d) {\n  const rx = b.x - a.x, ry = b.y - a.y;\n  const sx = d.x - c.x, sy = d.y - c.y;\n  const denominator = cross(rx, ry, sx, sy);\n  const scale = Math.max(1, Math.hypot(rx, ry), Math.hypot(sx, sy));\n  if (Math.abs(denominator) <= EPS * scale) {\n    if (Math.abs(cross(rx, ry, c.x - a.x, c.y - a.y)) <= EPS * scale &&\n        (onSegment(c, a, b) || onSegment(d, a, b) || onSegment(a, c, d) || onSegment(b, c, d))) return 'overlap';\n    return null;\n  }\n  const t = cross(c.x - a.x, c.y - a.y, sx, sy) / denominator;\n  const u = cross(c.x - a.x, c.y - a.y, rx, ry) / denominator;\n  if (t < -EPS || t > 1 + EPS || u < -EPS || u > 1 + EPS) return null;\n  if (t <= EPS || t >= 1 - EPS || u <= EPS || u >= 1 - EPS) return 'touch';\n  return { t, u, x: a.x + rx * t, y: a.y + ry * t };\n}\nfunction isSimpleRing(ring) {\n  if (ring.length < 3 || Math.abs(polygonArea(ring)) <= EPS * EPS) return false;\n  for (let i = 0; i < ring.length; i++) for (let j = i + 1; j < ring.length; j++) {\n    if (j === i + 1 || (i === 0 && j === ring.length - 1)) continue;\n    if (properIntersection(ring[i], ring[(i + 1) % ring.length], ring[j], ring[(j + 1) % ring.length])) return false;\n  }\n  return true;\n}\n\nfunction clipWeilerAthertonSimple(subject, windowRing) {\n  if (!isSimpleRing(subject) || !isSimpleRing(windowRing)) return null;\n  const s = polygonArea(subject) > 0 ? [...subject] : [...subject].reverse();\n  const c = polygonArea(windowRing) > 0 ? [...windowRing] : [...windowRing].reverse();\n  const sEvents = Array.from({ length: s.length }, () => []);\n  const cEvents = Array.from({ length: c.length }, () => []);\n  const events = [];\n  for (let i = 0; i < s.length; i++) for (let j = 0; j < c.length; j++) {\n    const hit = properIntersection(s[i], s[(i + 1) % s.length], c[j], c[(j + 1) % c.length]);\n    if (hit === 'overlap' || hit === 'touch') return null;\n    if (!hit) continue;\n    const sourceNode = { x: hit.x, y: hit.y, isIntersection: true, mate: null, next: null, entry: false, visited: false };\n    const clipNode = { x: hit.x, y: hit.y, isIntersection: true, mate: sourceNode, next: null };\n    sourceNode.mate = clipNode;\n    const event = { t: hit.t, u: hit.u, sourceNode, clipNode };\n    sEvents[i].push(event);\n    cEvents[j].push(event);\n    events.push(event);\n  }\n  if (!events.length) return null;\n  const sourceNodes = s.map((p) => ({ ...p, isIntersection: false, next: null }));\n  const clipNodes = c.map((p) => ({ ...p, isIntersection: false, next: null }));\n  for (let i = 0; i < s.length; i++) {\n    const list = sEvents[i].sort((a, b) => a.t - b.t);\n    let previous = sourceNodes[i];\n    for (const event of list) { previous.next = event.sourceNode; previous = event.sourceNode; }\n    previous.next = sourceNodes[(i + 1) % s.length];\n  }\n  for (let i = 0; i < c.length; i++) {\n    const list = cEvents[i].sort((a, b) => a.u - b.u);\n    let previous = clipNodes[i];\n    for (const event of list) { previous.next = event.clipNode; previous = event.clipNode; }\n    previous.next = clipNodes[(i + 1) % c.length];\n  }\n  for (const event of events) {\n    const n = event.sourceNode;\n    const pair = sEvents.findIndex((list) => list.includes(event));\n    const a = s[pair], b = s[(pair + 1) % s.length];\n    const length = Math.hypot(b.x - a.x, b.y - a.y);\n    const step = Math.min(0.0001, length * Math.min(event.t, 1 - event.t) * 0.1);\n    const sx = (b.x - a.x) / length * step;\n    const sy = (b.y - a.y) / length * step;\n    const wasInside = insideEvenOdd({ x: n.x - sx, y: n.y - sy }, [c], false);\n    const nowInside = insideEvenOdd({ x: n.x + sx, y: n.y + sy }, [c], false);\n    if (wasInside === nowInside) return null;\n    n.entry = !wasInside && nowInside;\n  }\n  const result = [];\n  const limit = s.length + c.length + events.length * 4 + 5;\n  for (const entryEvent of events.filter((event) => event.sourceNode.entry)) {\n    const start = entryEvent.sourceNode;\n    if (start.visited) continue;\n    let node = start;\n    let side = 'subject';\n    const ring = [];\n    let closed = false;\n    for (let i = 0; i < limit; i++) {\n      if (node === start && ring.length) { closed = true; break; }\n      ring.push({ x: node.x, y: node.y });\n      if (node.isIntersection) {\n        if (side === 'subject') {\n          if (node.entry) node.visited = true;\n          else { node = node.mate; side = 'clip'; }\n        } else if (node.mate.entry) { node = node.mate; side = 'subject'; node.visited = true; }\n      }\n      if (node === start && ring.length > 1) { closed = true; break; }\n      node = node.next;\n    }\n    if (!closed || ring.length < 3) return null;\n    if (ring.length > 1 && same(ring[0], ring.at(-1))) ring.pop();\n    if (ring.length >= 3 && Math.abs(polygonArea(ring)) > EPS * EPS) result.push(ring);\n  }\n  return result.length ? result : null;\n}\n\nfunction clipPolygon(rings, clipRing) {\n  if (rings.length === 1) {\n    const straightforward = clipWeilerAthertonSimple(rings[0], clipRing);\n    if (straightforward !== null) return straightforward;\n  }\n  return clipPolygonGraph(rings, clipRing);\n}\n\n\n\n\n\nfunction scanSegments(data, r, algorithm = 'liang', { tree = null, maxVisible = Infinity, renderMargin = 0, motionTime = null, motionAmplitude = 0 } = {}) {\n  const fn = algorithm === 'cohen' ? clipCohen : clipLiang;\n  let scanned = 0, prefiltered = 0, visible = 0, stored = 0, differences = 0;\n  const arithmetic = newOps();\n  const output = [];\n  const padding = renderMargin + (motionTime === null ? 0 : motionAmplitude);\n  const searchRect = padding > 0 ? { xmin: r.xmin - padding, ymin: r.ymin - padding,\n    xmax: r.xmax + padding, ymax: r.ymax + padding } : r;\n  const scan = (i) => {\n    scanned++;\n    let x1 = data[i], y1 = data[i + 1], x2 = data[i + 2], y2 = data[i + 3];\n    if (aabbMask(x1, y1, x2, y2, searchRect)) { prefiltered++; return; }\n    if (motionTime !== null && motionAmplitude > 0) {\n      const phase = (i / 4) * 0.0713;\n      const sx = motionAmplitude * Math.sin(motionTime * 0.00047 + phase);\n      const sy = motionAmplitude * Math.cos(motionTime * 0.00061 + phase * 1.33);\n      x1 += sx; x2 += sx; y1 += sy; y2 += sy;\n    }\n    if (renderMargin > 0 && stored < maxVisible) { output.push(x1, y1, x2, y2); stored++; }\n    if (aabbMask(x1, y1, x2, y2, r)) return;\n    const clipped = fn(x1, y1, x2, y2, r, arithmetic);\n    if (clipped) {\n      visible++;\n      if (renderMargin <= 0 && stored < maxVisible) { output.push(...clipped); stored++; }\n    }\n  };\n  let query = { nodesVisited: 0, candidates: data.length / 4 };\n  if (tree) query = tree.query(searchRect, scan);\n  else for (let i = 0; i < data.length; i += 4) scan(i);\n  return { output: renderMargin > 0 ? Float32Array.from(output) : Float64Array.from(output), scanned, prefiltered, visible, stored,\n    arithmetic, treeNodesVisited: query.nodesVisited, candidates: query.candidates, differences };\n}\nfunction compareAlgorithms(data, r, {motionTime = null, motionAmplitude = 0} = {}) {\n  const cohen = newOps(), liang = newOps();\n  let visible = 0, mismatch = 0, fastRejected = 0;\n  for (let i = 0; i < data.length; i += 4) {\n    let x1 = data[i], y1 = data[i + 1], x2 = data[i + 2], y2 = data[i + 3];\n    if (motionTime !== null && motionAmplitude > 0) {\n      const phase = (i / 4) * 0.0713;\n      const sx = motionAmplitude * Math.sin(motionTime * 0.00047 + phase);\n      const sy = motionAmplitude * Math.cos(motionTime * 0.00061 + phase * 1.33);\n      x1 += sx; x2 += sx; y1 += sy; y2 += sy;\n    }\n    if (aabbMask(x1, y1, x2, y2, r)) { fastRejected++; continue; }\n    const a = clipCohen(x1, y1, x2, y2, r, cohen);\n    const b = clipLiang(x1, y1, x2, y2, r, liang);\n    if (a) visible++;\n    if (!equivalentSegments(a, b)) mismatch++;\n  }\n  return { cohen, liang, visible, mismatch, fastRejected };\n}\nfunction fullBenchmark({ count = 500000, depths = [0, 4, 6, 8], densities = [0.6, 1, 3], samples = 16, seed = 2026 } = {}, notify = () => {}) {\n  const results = [];\n  const start = performance.now();\n  const scenarios = densities.length * depths.length;\n  let done = 0;\n  for (const density of densities) {\n    const data = makeDataset(count, density, seed);\n    for (const depth of depths) {\n      const buildStart = performance.now();\n      const tree = depth ? new Quadtree(data, DATA_BOUNDS, { maxDepth: depth }) : null;\n      const buildMs = performance.now() - buildStart;\n      const timings = [];\n      const visibleCounts = [];\n      let tested = 0;\n      for (let i = 0; i < samples; i++) {\n        const x = -280 + (560 * i) / Math.max(1, samples - 1);\n        const y = 90 * Math.sin(i * 1.37);\n        const r = { xmin: x - 24, ymin: y - 18, xmax: x + 24, ymax: y + 18 };\n        const t = performance.now();\n        const result = scanSegments(data, r, 'cohen', { tree, maxVisible: 0 });\n        timings.push(performance.now() - t);\n        visibleCounts.push(result.visible);\n        tested += result.scanned;\n      }\n      timings.sort((a, b) => a - b);\n      results.push({ count, density, depth, buildMs, medianMs: timings[Math.floor(timings.length / 2)],\n        p95Ms: timings[Math.min(timings.length - 1, Math.ceil(timings.length * 0.95) - 1)],\n        meanCandidates: tested / samples, meanVisible: visibleCounts.reduce((a, b) => a + b, 0) / samples,\n        nodes: tree?.nodes ?? 0, samples });\n      done++;\n      notify({ done, total: scenarios, density, depth });\n    }\n  }\n  return { meta: { count, depths, densities, samples, seed, elapsedMs: performance.now() - start,\n    algorithm: 'cohen', numericFormat: 'Float64Array', timestamp: new Date().toISOString(), platform: typeof navigator !== 'undefined' ? navigator.userAgent : `Node ${process.version}` }, results };\n}\n\n\nclass StressRenderer {\n  constructor(canvas) {\n    this.canvas = canvas;\n    this.gl = canvas.getContext('webgl2', { alpha: true, antialias: false, premultipliedAlpha: false });\n    if (!this.gl) throw new Error('WebGL2 is not available.');\n    const gl = this.gl;\n    const vertex = `#version 300 es\n    in vec2 a_position;\n    uniform vec2 u_center;\n    uniform vec2 u_size;\n    uniform vec2 u_shift;\n    uniform float u_scale;\n    void main() {\n      vec2 p = (a_position + u_shift - u_center) * u_scale;\n      gl_Position = vec4(2.0 * p.x / u_size.x, 2.0 * p.y / u_size.y, 0.0, 1.0);\n    }`;\n    const fragment = `#version 300 es\n    precision mediump float;\n    out vec4 fragColor;\n    void main() { fragColor = vec4(0.067, 0.584, 0.427, 0.98); }`;\n    const shader = (type, source) => {\n      const handle = gl.createShader(type);\n      gl.shaderSource(handle, source); gl.compileShader(handle);\n      if (!gl.getShaderParameter(handle, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(handle));\n      return handle;\n    };\n    this.program = gl.createProgram();\n    gl.attachShader(this.program, shader(gl.VERTEX_SHADER, vertex));\n    gl.attachShader(this.program, shader(gl.FRAGMENT_SHADER, fragment));\n    gl.linkProgram(this.program);\n    if (!gl.getProgramParameter(this.program, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(this.program));\n    this.buffer = gl.createBuffer();\n    this.vao = gl.createVertexArray();\n    gl.bindVertexArray(this.vao);\n    gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);\n    const index = gl.getAttribLocation(this.program, 'a_position');\n    gl.enableVertexAttribArray(index);\n    gl.vertexAttribPointer(index, 2, gl.FLOAT, false, 0, 0);\n    this.uniforms = Object.fromEntries(['u_center', 'u_size', 'u_shift', 'u_scale']\n      .map(name => [name, gl.getUniformLocation(this.program, name)]));\n    this.vertices = 0;\n  }\n  upload(packed) {\n    const gl = this.gl;\n    gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);\n    const input = packed instanceof Float32Array ? packed : Float32Array.from(packed);\n    gl.bufferData(gl.ARRAY_BUFFER, input, gl.DYNAMIC_DRAW);\n    this.vertices = input.length / 2;\n  }\n  draw(camera, width, height, ratio, r, shift) {\n    const gl = this.gl;\n    gl.viewport(0, 0, this.canvas.width, this.canvas.height);\n    gl.clearColor(0, 0, 0, 0);\n    gl.clear(gl.COLOR_BUFFER_BIT);\n    if (!this.vertices) return;\n    const left = Math.max(0, Math.floor(((r.xmin - camera.x) * camera.scale + width / 2) * ratio));\n    const right = Math.min(this.canvas.width, Math.ceil(((r.xmax - camera.x) * camera.scale + width / 2) * ratio));\n    const bottom = Math.max(0, Math.floor(((r.ymin - camera.y) * camera.scale + height / 2) * ratio));\n    const top = Math.min(this.canvas.height, Math.ceil(((r.ymax - camera.y) * camera.scale + height / 2) * ratio));\n    if (right <= left || top <= bottom) return;\n    gl.enable(gl.SCISSOR_TEST);\n    gl.scissor(left, bottom, right - left, top - bottom);\n    gl.useProgram(this.program);\n    gl.bindVertexArray(this.vao);\n    gl.uniform2f(this.uniforms.u_center, camera.x, camera.y);\n    gl.uniform2f(this.uniforms.u_size, width, height);\n    gl.uniform2f(this.uniforms.u_shift, shift.x, shift.y);\n    gl.uniform1f(this.uniforms.u_scale, camera.scale);\n    gl.drawArrays(gl.LINES, 0, this.vertices);\n    gl.disable(gl.SCISSOR_TEST);\n  }\n}\n\n\n\n\n\nlet data = null;\nlet tree = null;\nlet config = null;\nself.onmessage = (event) => {\n  const message = event.data;\n  try {\n    if (message.kind === 'init') {\n      const start = performance.now();\n      config = { count: message.count, depth: message.depth, density: message.density, seed: 2026 };\n      data = makeDataset(config.count, config.density, config.seed);\n      const generatedMs = performance.now() - start;\n      tree = config.depth > 0 ? new Quadtree(data, DATA_BOUNDS, { maxDepth: config.depth }) : null;\n      self.postMessage({ kind: 'ready', count: config.count, nodes: tree?.nodes ?? 0,\n        generatedMs, buildMs: performance.now() - start - generatedMs });\n    } else if (message.kind === 'query') {\n      if (!data) return;\n      const window = rect(...message.bounds);\n      const start = performance.now();\n      const result = scanSegments(data, window, message.algorithm, { tree, renderMargin: 10, motionTime: message.motionTime, motionAmplitude: message.motionAmplitude || 0 });\n      const ms = performance.now() - start;\n      self.postMessage({ kind: 'queryResult', id: message.id, ms, result }, [result.output.buffer]);\n    } else if (message.kind === 'compare') {\n      if (!data) return;\n      const start = performance.now();\n      const result = compareAlgorithms(data, rect(...message.bounds), {motionTime: message.motionTime, motionAmplitude: message.motionAmplitude || 0});\n      self.postMessage({ kind: 'comparison', result, ms: performance.now() - start });\n    } else if (message.kind === 'benchmark') {\n      const result = fullBenchmark(message.options, (info) => self.postMessage({ kind: 'progress', info }));\n      self.postMessage({ kind: 'benchmarkResult', result });\n    }\n  } catch (error) {\n    self.postMessage({ kind: 'error', message: String(error?.message ?? error) });\n  }\n};\n";
+const $ = (id) => document.getElementById(id);
+const $all = (selector) => [...document.querySelectorAll(selector)];
+const nfmt = (number, digits = 2) => Number.isFinite(number) ? Number(number).toLocaleString('ru-RU', { maximumFractionDigits: digits }) : '—';
+const coord = (x) => nfmt(x, 4);
+const linePresets = {
+  cross: [[-22, -11, 20, 14], [-24, 9, 22, -9], [-18, 0, 18, 0], [0, -17, 0, 18], [-15, 11, 15, 11], [13, -15, 13, 18], [-18, -13, -12, -9], [-7, -4, 8, 5]],
+  border: [[-10, -8, 10, -8], [-10, 8, 10, 8], [-10, -8, -10, 8], [10, -8, 10, 8], [-15, 8, 15, 8], [-17, -8, 12, -8], [-10, 0, -10, 0], [10, 8, 10, 8]],
+  vertex: [[-25, -23, 10, 8], [-25, 23, 10, -8], [0, -18, 20, 2], [-10, -8, -10, -8], [10, 8, 10, 8], [-15, 5, -10, 8], [-15, -8, 10, -8]],
+  parallel: [[-24, 9, 24, 9], [-25, 8, 20, 8], [-25, -8, 20, -8], [-25, -9, 20, -9], [12, -19, 12, 19], [10, -20, 10, 20], [0, 0, 0, 0]]
+};
+const convexPresets = {
+  diamond: '0 -12\n14 0\n0 12\n-14 0',
+  triangle: '-16 -10\n17 -7\n0 15',
+  hexagon: '-16 0\n-8 -12\n9 -12\n16 0\n9 12\n-8 12',
+  square: '-12 -9\n12 -9\n12 9\n-12 9'
+};
+const polyPresets = {
+  concave: '-18 -12\n-8 -12\n-8 2\n-3 2\n-3 -4\n9 -4\n9 -12\n18 -12\n18 15\n-18 15',
+  split: '-18 -12\n-4 -12\n-4 12\n4 12\n4 -12\n18 -12\n18 14\n-18 14',
+  hole: '-16 -13\n16 -13\n16 13\n-16 13\n\n-4 -4\n4 -4\n4 4\n-4 4',
+  bowtie: '-16 -12\n16 12\n-16 12\n16 -12',
+  corners: '-10 -8\n0 -20\n10 -8\n22 0\n10 8\n0 20\n-10 8\n-22 0',
+  overlap: '-10 -8\n16 -8\n16 12\n-10 12'
+};
+const app = {
+  mode: 'segments', algorithm: 'cohen', window: rect(-10, -8, 10, 8),
+  segments: linePresets.cross.map((s) => [...s]), polygon: parseRings(polyPresets.concave),
+  polygonResult: [], segmentResult: [], convexClip: parseRings(convexPresets.diamond)[0], comparison: null,
+  camera: { x: 0, y: 0, scale: 14 }, width: 760, height: 440, pixelRatio: 1,
+  pointer: null, animation: false, currentShift: { x: 0, y: 0 },
+  worker: null, benchWorker: null, queryPending: false, queryDirty: false, queryCounter: 0,
+  stressReady: false, stressCount: 0, stressNodes: 0, stressResult: null, stressBuildMs: 0,
+  benchmark: null, benchmarkBusy: false, frameTimes: [], lastFrame: 0, lastResultTime: 0, paintScheduled: false,
+  fps: 0, lastPaintAt: 0, renderFrameTimes: [], gpu: null
+};
+const canvas = $('geometry-canvas');
+const stressCanvas = $('stress-canvas');
+const ctx = canvas.getContext('2d', { alpha: true });
+try { app.gpu = new StressRenderer(stressCanvas); } catch (error) { app.gpu = null; }
+
+function showError(error) {
+  const box = $('form-error');
+  box.textContent = error?.message || String(error);
+  box.hidden = false;
+}
+function clearError() { $('form-error').hidden = true; }
+function valuesOfWindow() {
+  const values = ['xmin', 'ymin', 'xmax', 'ymax'].map((id) => {
+    const element = $(id);
+    if (element.value.trim() === '') throw new Error(`Укажите ${id}.`);
+    const value = Number(element.value.replace(',', '.'));
+    if (!Number.isFinite(value)) throw new Error(`Проверьте ${id}.`);
+    return value;
+  });
+  return rect(...values);
+}
+function syncWindow() {
+  for (const key of ['xmin', 'ymin', 'xmax', 'ymax']) $(key).value = Number(app.window[key].toFixed(7));
+}
+function parseSegmentRows(text) {
+  const lines = text.split(/\r?\n/).map((s) => s.trim()).filter(Boolean);
+  if (lines.length > 30000) throw new Error('Ручной режим ограничен 30 000 отрезками; для больших данных используйте Quadtree.');
+  return lines.map((line) => {
+    const coords = line.replace(/,/g, '.').split(/\s+/).map(Number);
+    if (coords.length !== 4 || !coords.every(Number.isFinite)) throw new Error(`В строке «${line}» нужны четыре координаты.`);
+    return coords;
+  });
+}
+function writeSegmentRows() { $('segments-input').value = app.segments.map((s) => s.map((v) => Number(v.toFixed(7))).join(' ')).join('\n'); }
+function toScreen(x, y) { return { x: (x - app.camera.x) * app.camera.scale + app.width / 2,
+  y: (app.camera.y - y) * app.camera.scale + app.height / 2 }; }
+function toWorld(x, y) { return { x: (x - app.width / 2) / app.camera.scale + app.camera.x,
+  y: app.camera.y - (y - app.height / 2) / app.camera.scale }; }
+function frameCanvas() {
+  const bounds = canvas.getBoundingClientRect();
+  app.width = Math.max(240, bounds.width);
+  app.height = Math.max(300, bounds.height);
+  app.pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+  stressCanvas.width = Math.round(app.width * app.pixelRatio);
+  stressCanvas.height = Math.round(app.height * app.pixelRatio);
+  canvas.width = Math.round(app.width * app.pixelRatio);
+  canvas.height = Math.round(app.height * app.pixelRatio);
+  ctx.setTransform(app.pixelRatio, 0, 0, app.pixelRatio, 0, 0);
+  queuePaint();
+}
+function queuePaint() {
+  if (app.paintScheduled) return;
+  app.paintScheduled = true;
+  requestAnimationFrame(() => { app.paintScheduled = false; paint(); });
+}
+function gridStep() {
+  const target = 66 / app.camera.scale;
+  const magnitude = 10 ** Math.floor(Math.log10(Math.max(target, 1e-9)));
+  return [1, 2, 5, 10].map((v) => v * magnitude).find((v) => v >= target) || 10 * magnitude;
+}
+function paintGrid() {
+  ctx.clearRect(0, 0, app.width, app.height);
+  if (app.mode !== 'stress') { ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, app.width, app.height); }
+  const step = gridStep();
+  const topLeft = toWorld(0, 0), bottomRight = toWorld(app.width, app.height);
+  const xmin = topLeft.x, xmax = bottomRight.x, ymin = bottomRight.y, ymax = topLeft.y;
+  if ($('show-grid').checked) {
+    ctx.beginPath(); ctx.strokeStyle = '#edf0f5'; ctx.lineWidth = 1;
+    for (let x = Math.ceil(xmin / step) * step; x <= xmax + EPS; x += step) {
+      const px = Math.round(toScreen(x, 0).x) + .5; ctx.moveTo(px, 0); ctx.lineTo(px, app.height);
+    }
+    for (let y = Math.ceil(ymin / step) * step; y <= ymax + EPS; y += step) {
+      const py = Math.round(toScreen(0, y).y) + .5; ctx.moveTo(0, py); ctx.lineTo(app.width, py);
+    }
+    ctx.stroke();
+  }
+  if (!$('show-axes').checked) return;
+  const zero = toScreen(0, 0);
+  ctx.strokeStyle = '#b9c3d2'; ctx.lineWidth = 1.25; ctx.beginPath();
+  ctx.moveTo(zero.x, 0); ctx.lineTo(zero.x, app.height);
+  ctx.moveTo(0, zero.y); ctx.lineTo(app.width, zero.y); ctx.stroke();
+  ctx.fillStyle = '#7b8799'; ctx.font = '11px system-ui';
+  for (let x = Math.ceil(xmin / step) * step; x <= xmax + EPS; x += step) {
+    const pos = toScreen(x, 0);
+    ctx.fillText(nfmt(x, 4), pos.x + 3, Math.max(14, Math.min(app.height - 8, zero.y + 15)));
+  }
+  for (let y = Math.ceil(ymin / step) * step; y <= ymax + EPS; y += step) {
+    if (Math.abs(y) <= EPS) continue;
+    const pos = toScreen(0, y);
+    ctx.fillText(nfmt(y, 4), Math.max(5, Math.min(app.width - 35, zero.x + 6)), pos.y - 3);
+  }
+}
+function drawWindow() {
+  const r = app.window, lt = toScreen(r.xmin, r.ymax), rb = toScreen(r.xmax, r.ymin);
+  ctx.fillStyle = 'rgba(40, 99, 189, 0.055)';
+  ctx.fillRect(lt.x, lt.y, rb.x - lt.x, rb.y - lt.y);
+  ctx.setLineDash([7, 4]); ctx.strokeStyle = '#2863bd'; ctx.lineWidth = 2;
+  ctx.strokeRect(lt.x, lt.y, rb.x - lt.x, rb.y - lt.y);
+  ctx.setLineDash([]);
+  for (const x of [r.xmin, r.xmax]) for (const y of [r.ymin, r.ymax]) {
+    const p = toScreen(x, y);
+    ctx.fillStyle = 'white'; ctx.strokeStyle = '#2863bd'; ctx.lineWidth = 1.4;
+    ctx.fillRect(p.x - 4.5, p.y - 4.5, 9, 9); ctx.strokeRect(p.x - 4.5, p.y - 4.5, 9, 9);
+  }
+}
+function drawSegment(s, color, width = 1.8, shift = null) {
+  const dx = shift?.x || 0, dy = shift?.y || 0;
+  const a = toScreen(s[0] + dx, s[1] + dy), b = toScreen(s[2] + dx, s[3] + dy);
+  ctx.beginPath(); ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = width;
+  if (Math.abs(a.x - b.x) <= 0.001 && Math.abs(a.y - b.y) <= 0.001) {
+    ctx.arc(a.x, a.y, Math.max(2.7, width * 1.4), 0, Math.PI * 2); ctx.fill();
+  } else { ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke(); }
+}
+function drawPolyContours(rings, fill, stroke) {
+  if (!rings.length) return;
+  ctx.beginPath();
+  for (const ring of rings) {
+    if (ring.length < 2) continue;
+    let v = toScreen(ring[0].x, ring[0].y);
+    ctx.moveTo(v.x, v.y);
+    for (let i = 1; i < ring.length; i++) {
+      v = toScreen(ring[i].x, ring[i].y); ctx.lineTo(v.x, v.y);
+    }
+    ctx.closePath();
+  }
+  if (fill) { ctx.fillStyle = fill; ctx.fill('evenodd'); }
+  if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = 2; ctx.stroke(); }
+}
+function drawConvexClip() {
+  drawPolyContours([app.convexClip], 'rgba(40, 99, 189, 0.055)', '#2863bd');
+  for (const v of app.convexClip) {
+    const p = toScreen(v.x, v.y);
+    ctx.fillStyle = 'white'; ctx.strokeStyle = '#2863bd'; ctx.lineWidth = 1.3;
+    ctx.fillRect(p.x - 4, p.y - 4, 8, 8); ctx.strokeRect(p.x - 4, p.y - 4, 8, 8);
+  }
+}
+function writeConvexRows() { $('convex-input').value = app.convexClip.map(v => `${Number(v.x.toFixed(9))} ${Number(v.y.toFixed(9))}`).join('\n'); }
+function paint() {
+  paintGrid();
+  if (app.mode === 'segments' || app.mode === 'convex') {
+    if ($('show-original').checked) for (const segment of app.segments) drawSegment(segment, '#a8b0bd', 1.8);
+    if (app.mode === 'convex') drawConvexClip(); else drawWindow();
+    for (const seg of app.segmentResult) if (seg) drawSegment(seg, '#13996f', 3);
+    for (const s of app.segments) for (const k of [0, 2]) {
+      const p = toScreen(s[k], s[k + 1]);
+      ctx.beginPath(); ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+      ctx.fillStyle = '#9da7b7'; ctx.fill();
+    }
+  } else if (app.mode === 'polygons') {
+    if ($('show-original').checked) drawPolyContours(app.polygon, 'rgba(135,148,169,.11)', '#a1aabb');
+    drawWindow();
+    drawPolyContours(app.polygonResult, 'rgba(20,151,110,.28)', '#15966e');
+    if ($('show-original').checked) for (const ring of app.polygon) for (const v of ring) {
+      const p = toScreen(v.x, v.y); ctx.fillStyle = '#95a1b4'; ctx.fillRect(p.x - 2.5, p.y - 2.5, 5, 5);
+    }
+  } else {
+    drawWindow();
+    if (app.stressResult && !app.gpu) {
+      const array = app.stressResult.output;
+      ctx.save();
+      const lt = toScreen(app.window.xmin, app.window.ymax), rb = toScreen(app.window.xmax, app.window.ymin);
+      ctx.beginPath(); ctx.rect(lt.x, lt.y, rb.x - lt.x, rb.y - lt.y); ctx.clip();
+      ctx.beginPath(); ctx.strokeStyle = '#11956d'; ctx.lineWidth = 1.05;
+      for (let i = 0; i < array.length; i += 4) {
+        const a = toScreen(array[i] + app.currentShift.x, array[i + 1] + app.currentShift.y);
+        const b = toScreen(array[i + 2] + app.currentShift.x, array[i + 3] + app.currentShift.y);
+        ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
+      }
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+  if (app.mode === 'stress' && app.gpu) {
+    app.gpu.draw(app.camera, app.width, app.height, app.pixelRatio, app.window, app.currentShift);
+  }
+  if (app.mode === 'stress' && app.animation && app.stressReady) {
+    const now = performance.now();
+    if (app.lastPaintAt) app.renderFrameTimes.push(now - app.lastPaintAt);
+    if (app.renderFrameTimes.length > 60) app.renderFrameTimes.shift();
+    app.lastPaintAt = now;
+    if (app.renderFrameTimes.length >= 8) {
+      const mean = app.renderFrameTimes.reduce((a, b) => a + b, 0) / app.renderFrameTimes.length;
+      $('fps-label').textContent = `Рендер ${nfmt(1000 / mean, 1)} FPS`;
+    }
+  }
+}
+function setStageMessage(text) { $('canvas-badge').textContent = text; }
+function recomputeSmall() {
+  if (app.mode === 'segments' || app.mode === 'convex') {
+    const start = performance.now();
+    const fn = app.mode === 'convex' ? (x1,y1,x2,y2) => clipCyrusBeck(x1,y1,x2,y2,app.convexClip,null,app.convexSign) : (app.algorithm === 'cohen' ? clipCohen : clipLiang);
+    app.segmentResult = app.segments.map((s) => fn(...s, app.window));
+    const elapsed = performance.now() - start;
+    $('stat-total').textContent = nfmt(app.segments.length, 0);
+    $('stat-visible').textContent = nfmt(app.segmentResult.filter(Boolean).length, 0);
+    $('stat-work').textContent = `${nfmt(elapsed, 3)} мс`;
+    $('stat-total-label').textContent = 'Всего отрезков';
+    setStageMessage(app.mode === 'convex' ? 'Сайрус–Бек · выпуклый многоугольник' : app.algorithm === 'cohen' ? 'Коэн–Сазерленд · вариант 10' : 'Лианг–Барски');
+    renderSegmentsTable();
+  } else if (app.mode === 'polygons') {
+    const start = performance.now();
+    app.polygonResult = clipPolygon(app.polygon, rectangleRing(app.window));
+    const elapsed = performance.now() - start;
+    $('stat-total').textContent = nfmt(app.polygon.reduce((acc, ring) => acc + ring.length, 0), 0);
+    $('stat-total-label').textContent = 'Исходных вершин';
+    $('stat-visible').textContent = nfmt(app.polygonResult.length, 0);
+    $('stat-work').textContent = `${nfmt(elapsed, 3)} мс`;
+    setStageMessage('Контурный граф · even-odd');
+    renderPolygonTable();
+  } else {
+    requestStressQuery();
+  }
+  queuePaint();
+}
+function renderSegmentsTable() {
+  $('segment-table').innerHTML = app.segments.slice(0, 15).map((s, i) => `<tr><td>${i + 1}</td><td>${s.map(coord).join(' · ')}</td><td>${app.segmentResult[i]?.map(coord).join(' · ') || 'Отброшен'}</td></tr>`).join('') +
+    (app.segments.length > 15 ? '<tr><td colspan="3">Показаны первые 15 отрезков</td></tr>' : '');
+}
+function renderPolygonTable() {
+  const rings = app.polygonResult;
+  $('polygon-table').innerHTML = rings.map((ring, i) => {
+    const area = polygonArea(ring);
+    return `<tr><td>${i + 1}</td><td>${ring.length}</td><td>${nfmt(area, 4)}</td><td>${area < 0 ? 'Отверстие' : 'Внешняя граница'}</td></tr>`;
+  }).join('') || '<tr><td colspan="4">Видимых площадных областей нет</td></tr>';
+  const shapeArea = rings.reduce((sum, ring) => sum + polygonArea(ring), 0);
+  $('polygon-stats').innerHTML = `<div class="compare-table"><div><small>Внешние контуры</small><strong>${rings.filter((r) => polygonArea(r) > 0).length}</strong></div><div><small>Внутренние отверстия</small><strong>${rings.filter((r) => polygonArea(r) < 0).length}</strong></div><div><small>Площадь пересечения</small><strong>${nfmt(shapeArea, 4)}</strong></div></div>`;
+}
+function runComparison() {
+  if (app.mode === 'convex') {
+    const ops = newOps();
+    let visible = 0;
+    for (const segment of app.segments) if (clipCyrusBeck(...segment, app.convexClip, ops, app.convexSign)) visible++;
+    $('compare-results').innerHTML = `<div class="compare-table"><div><small>Сайрус–Бек · ${app.convexClip.length} рёбер</small><strong>${nfmt(ops.mul,0)} × / ${nfmt(ops.div,0)} ÷</strong><span>Видимых: ${visible}</span></div></div>`;
+    return;
+  }
+  if (app.mode === 'stress') {
+    if (!app.stressReady) { showError('Сначала создайте набор отрезков.'); return; }
+    const b = localWindow(app.currentShift);
+    app.worker?.postMessage({ kind: 'compare', bounds: b,
+      motionTime: app.animation ? performance.now() : null,
+      motionAmplitude: app.animation && $('independent-motion').checked ? 3 : 0 });
+    return;
+  }
+  const a = newOps(), b = newOps();
+  let disagreements = 0;
+  for (const s of app.segments) {
+    const x = clipCohen(...s, app.window, a), y = clipLiang(...s, app.window, b);
+    if (!equivalentSegments(x, y)) disagreements++;
+  }
+  showComparison({ cohen: a, liang: b, mismatch: disagreements, fastRejected: 0 }, app.segments.length);
+}
+function showComparison(result, count, target = 'compare-results') {
+  const { cohen, liang, mismatch, fastRejected } = result;
+  $(target).innerHTML = `<div class="compare-table"><div><small>Коэн–Сазерленд</small><strong>${nfmt(cohen.mul, 0)} × / ${nfmt(cohen.div, 0)} ÷</strong><span>Умножения / деления</span></div><div><small>Лианг–Барски</small><strong>${nfmt(liang.mul, 0)} × / ${nfmt(liang.div, 0)} ÷</strong><span>Умножения / деления</span></div><div><small>Расхождений</small><strong class="${mismatch ? 'note-error' : 'note-good'}">${nfmt(mismatch, 0)}</strong><span>Проверено: ${nfmt(count, 0)}, AABB: ${nfmt(fastRejected, 0)}</span></div></div>`;
+}
+function applyWindow() {
+  try { app.window = valuesOfWindow(); clearError(); recomputeSmall(); } catch (e) { showError(e); }
+}
+function showMode() {
+  app.mode = $('mode').value;
+  $('segment-controls').hidden = app.mode !== 'segments' && app.mode !== 'convex';
+  $('convex-controls').hidden = app.mode !== 'convex';
+  $('rectangle-controls').hidden = app.mode === 'convex';
+  $('algorithm-field').hidden = app.mode === 'convex';
+  $('polygon-controls').hidden = app.mode !== 'polygons';
+  $('stress-controls').hidden = app.mode !== 'stress';
+  $('segment-details').hidden = app.mode !== 'segments' && app.mode !== 'convex';
+  $('polygon-details').hidden = app.mode !== 'polygons';
+  $('stress-details').hidden = app.mode !== 'stress';
+  app.animation = app.mode === 'stress' && $('animate-stress').checked;
+  if (app.mode === 'stress') {
+    app.camera.scale = 5; app.camera.x = 0; app.camera.y = 0;
+    $('stat-total').textContent = nfmt(app.stressCount, 0);
+    $('stat-total-label').textContent = 'Всего отрезков';
+    $('stat-visible').textContent = '—'; $('stat-work').textContent = '—';
+    setStageMessage(app.stressReady ? 'Quadtree' : 'Создайте набор данных');
+    requestStressQuery();
+  } else { app.camera.scale = 14; app.camera.x = 0; app.camera.y = 0; recomputeSmall(); }
+  updateZoom(); queuePaint();
+}
+function updateZoom() { $('zoom-value').textContent = `${nfmt(app.camera.scale / (app.mode === 'stress' ? 5 : 14) * 100, 0)} %`; }
+function scaleAt(factor, x = app.width / 2, y = app.height / 2) {
+  const anchor = toWorld(x, y);
+  app.camera.scale = Math.min(260, Math.max(.16, app.camera.scale * factor));
+  app.camera.x = anchor.x - (x - app.width / 2) / app.camera.scale;
+  app.camera.y = anchor.y + (y - app.height / 2) / app.camera.scale;
+  updateZoom(); queuePaint();
+}
+function resetCamera() {
+  const vertices = (app.mode === 'segments' || app.mode === 'convex') ? app.segments.flatMap(([a, b, c, d]) => [[a, b], [c, d]]) :
+    app.mode === 'polygons' ? app.polygon.flat().map((p) => [p.x, p.y]) : [];
+  if (app.mode === 'convex') for (const p of app.convexClip) vertices.push([p.x, p.y]);
+  else vertices.push([app.window.xmin, app.window.ymin], [app.window.xmax, app.window.ymax]);
+  const xs = vertices.map((v) => v[0]), ys = vertices.map((v) => v[1]);
+  const width = Math.max(10, Math.max(...xs) - Math.min(...xs));
+  const height = Math.max(10, Math.max(...ys) - Math.min(...ys));
+  app.camera.x = (Math.max(...xs) + Math.min(...xs)) / 2;
+  app.camera.y = (Math.max(...ys) + Math.min(...ys)) / 2;
+  app.camera.scale = Math.min(app.width * .86 / width, app.height * .84 / height, 70);
+  if (app.mode === 'stress') app.camera.scale = 5;
+  updateZoom(); queuePaint();
+}
+function pointerLocation(event) {
+  const b = canvas.getBoundingClientRect();
+  return { x: event.clientX - b.left, y: event.clientY - b.top };
+}
+function nearPixels(p, q, radius) { return Math.hypot(p.x - q.x, p.y - q.y) <= radius; }
+function pixelDistanceToSegment(p, a, b) {
+  const dx = b.x - a.x, dy = b.y - a.y;
+  const length2 = dx * dx + dy * dy;
+  if (length2 <= 1e-9) return Math.hypot(p.x - a.x, p.y - a.y);
+  const t = Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / length2));
+  return Math.hypot(p.x - (a.x + t * dx), p.y - (a.y + t * dy));
+}
+function hitTarget(p) {
+  const r = app.window;
+  if (app.mode === 'convex') for (let i = 0; i < app.convexClip.length; i++) {
+    if (nearPixels(p, toScreen(app.convexClip[i].x, app.convexClip[i].y), 10)) return { kind: 'convex-vertex', i };
+  }
+  if (app.mode !== 'convex') for (const [name, x, y] of [['lb',r.xmin,r.ymin],['lt',r.xmin,r.ymax],['rb',r.xmax,r.ymin],['rt',r.xmax,r.ymax]]) {
+    if (nearPixels(p, toScreen(x, y), 10)) return { kind: 'corner', corner: name };
+  }
+  if (app.mode === 'segments' || app.mode === 'convex') for (let i = 0; i < app.segments.length; i++) for (const k of [0, 2]) {
+    const s = app.segments[i];
+    if (nearPixels(p, toScreen(s[k], s[k + 1]), 9)) return { kind: 'endpoint', i, k };
+  }
+  if (app.mode === 'segments' || app.mode === 'convex') for (let i = app.segments.length - 1; i >= 0; i--) {
+    const s = app.segments[i];
+    if (pixelDistanceToSegment(p, toScreen(s[0], s[1]), toScreen(s[2], s[3])) <= 5) return { kind: 'move-segment', i };
+  }
+  const w = toWorld(p.x, p.y);
+  if (app.mode === 'convex' && insideEvenOdd(w, [app.convexClip])) return { kind: 'move-clip' };
+  if (app.mode !== 'convex' && w.x >= r.xmin && w.x <= r.xmax && w.y >= r.ymin && w.y <= r.ymax) return { kind: 'move-window' };
+  return { kind: 'pan' };
+}
+canvas.addEventListener('pointerdown', (event) => {
+  if (event.button !== 0) return;
+  const p = pointerLocation(event);
+  app.pointer = { ...hitTarget(p), first: p, previous: p };
+  canvas.setPointerCapture(event.pointerId);
+  canvas.style.cursor = 'grabbing';
+});
+canvas.addEventListener('pointermove', (event) => {
+  const p = pointerLocation(event);
+  const w = toWorld(p.x, p.y);
+  $('cursor-coordinates').textContent = `(${coord(w.x)}; ${coord(w.y)})`;
+  if (!app.pointer) return;
+  const previousWorld = toWorld(app.pointer.previous.x, app.pointer.previous.y);
+  const dx = w.x - previousWorld.x, dy = w.y - previousWorld.y;
+  const target = app.pointer;
+  if (target.kind === 'pan') {
+    app.camera.x -= dx; app.camera.y -= dy;
+  } else if (target.kind === 'move-clip' || target.kind === 'convex-vertex') {
+    const proposed = app.convexClip.map(v => ({ ...v }));
+    if (target.kind === 'move-clip') for (const v of proposed) { v.x += dx; v.y += dy; }
+    else proposed[target.i] = {x:w.x,y:w.y};
+    try { const sign = convexOrientation(proposed); app.convexClip = proposed; app.convexSign = sign; writeConvexRows(); } catch (_) {}
+  } else if (target.kind === 'move-window') {
+    for (const key of ['xmin', 'xmax']) app.window[key] += dx;
+    for (const key of ['ymin', 'ymax']) app.window[key] += dy;
+    syncWindow();
+  } else if (target.kind === 'corner') {
+    const keyX = target.corner.includes('l') ? 'xmin' : 'xmax';
+    const keyY = target.corner.includes('b') ? 'ymin' : 'ymax';
+    const proposedX = w.x, proposedY = w.y;
+    if (keyX === 'xmin') app.window.xmin = Math.min(proposedX, app.window.xmax - EPS * 4);
+    else app.window.xmax = Math.max(proposedX, app.window.xmin + EPS * 4);
+    if (keyY === 'ymin') app.window.ymin = Math.min(proposedY, app.window.ymax - EPS * 4);
+    else app.window.ymax = Math.max(proposedY, app.window.ymin + EPS * 4);
+    syncWindow();
+  } else if (target.kind === 'move-segment') {
+    const s = app.segments[target.i];
+    s[0] += dx; s[1] += dy; s[2] += dx; s[3] += dy;
+    writeSegmentRows();
+  } else if (target.kind === 'endpoint') {
+    app.segments[target.i][target.k] = w.x;
+    app.segments[target.i][target.k + 1] = w.y;
+    writeSegmentRows();
+  }
+  target.previous = p;
+  if (target.kind === 'pan') queuePaint(); else recomputeSmall();
+});
+function endPointer() { app.pointer = null; canvas.style.cursor = 'crosshair'; }
+canvas.addEventListener('pointerup', endPointer);
+canvas.addEventListener('pointercancel', endPointer);
+canvas.addEventListener('wheel', (event) => { event.preventDefault(); const p = pointerLocation(event); scaleAt(event.deltaY > 0 ? .88 : 1.13, p.x, p.y); }, { passive: false });
+
+function makeWorker() {
+  const url = URL.createObjectURL(new Blob([INLINE_WORKER_SOURCE], { type: 'text/javascript' }));
+  const worker = new Worker(url);
+  URL.revokeObjectURL(url);
+  return worker;
+}
+function localWindow(shift = { x: 0, y: 0 }) {
+  const r = app.window;
+  return [r.xmin - shift.x, r.ymin - shift.y, r.xmax - shift.x, r.ymax - shift.y];
+}
+function createStressData() {
+  clearError();
+  if (app.worker) app.worker.terminate();
+  app.worker = makeWorker();
+  app.stressReady = false;
+  app.stressResult = null;
+  if (app.gpu) app.gpu.upload(new Float32Array(0));
+  app.queryPending = false;
+  app.queryDirty = false;
+  app.stressCount = Number($('stress-count').value);
+  const depth = Number($('tree-depth').value), density = Number($('stress-density').value);
+  $('stress-summary').textContent = `Формируем ${nfmt(app.stressCount, 0)} отрезков и индекс...`;
+  $('build-tree').disabled = true;
+  app.worker.onmessage = (event) => {
+    const message = event.data;
+    if (message.kind === 'ready') {
+      app.stressReady = true; app.stressNodes = message.nodes;
+      app.stressBuildMs = message.buildMs;
+      $('build-tree').disabled = false;
+      $('stress-summary').textContent = `${nfmt(message.count, 0)} отрезков · ${nfmt(message.nodes, 0)} узлов · построение ${nfmt(message.buildMs, 0)} мс · генерация ${nfmt(message.generatedMs, 0)} мс`;
+      $('stat-total').textContent = nfmt(app.stressCount, 0);
+      setStageMessage(depth ? `Quadtree · глубина ${depth}` : 'Полный перебор');
+      requestStressQuery();
+    } else if (message.kind === 'queryResult') {
+      app.queryPending = false;
+      if (app.mode !== 'stress' || message.id !== app.queryCounter) return;
+      app.stressResult = message.result;
+      if (app.gpu) app.gpu.upload(message.result.output);
+      if (!app.animation) app.currentShift = {x:0,y:0};
+      $('stat-total').textContent = nfmt(app.stressCount, 0);
+      $('stat-visible').textContent = nfmt(message.result.visible, 0);
+      $('stat-work').textContent = `${nfmt(message.ms, 2)} мс`;
+      $('tree-nodes-visited').textContent = nfmt(message.result.treeNodesVisited, 0);
+      $('tree-candidates').textContent = nfmt(message.result.candidates, 0);
+      $('tree-rejected').textContent = nfmt(message.result.prefiltered, 0);
+      $('tree-rendered').textContent = nfmt(message.result.stored, 0);
+      $('stat-work-hint').textContent = 'Вычисление в Web Worker';
+      if (app.animation) {
+        const now = performance.now();
+        if (app.lastResultTime) app.frameTimes.push(now - app.lastResultTime);
+        if (app.frameTimes.length > 40) app.frameTimes.shift();
+        app.lastResultTime = now;
+        if (app.frameTimes.length) {
+          const mean = app.frameTimes.reduce((a, b) => a + b, 0) / app.frameTimes.length;
+          $('query-fps-label').textContent = `Точное отсечение ${nfmt(1000 / mean, 1)} Гц`;
+        }
+      }
+      queuePaint();
+      if (app.queryDirty) { app.queryDirty = false; requestStressQuery(); }
+    } else if (message.kind === 'comparison') {
+      const result = message.result;
+      showComparison(result, app.stressCount, 'stress-compare-results');
+    } else if (message.kind === 'error') { $('build-tree').disabled = false; showError(message.message); }
+  };
+  app.worker.onerror = (event) => { $('build-tree').disabled = false; showError(event.message); };
+  app.worker.postMessage({ kind: 'init', count: app.stressCount, depth, density });
+}
+function requestStressQuery() {
+  if (app.mode !== 'stress' || !app.stressReady || !app.worker) return;
+  if (app.queryPending) { app.queryDirty = true; return; }
+  app.queryPending = true;
+  const shift = app.animation ? { ...app.currentShift } : { x: 0, y: 0 };
+  app.requestShift = shift;
+  app.worker.postMessage({ kind: 'query', id: ++app.queryCounter, bounds: localWindow(shift), algorithm: app.algorithm,
+    motionTime: app.animation ? performance.now() : null,
+    motionAmplitude: app.animation && $('independent-motion').checked ? 3 : 0 });
+}
+function animationFrame() {
+  if (app.animation && app.mode === 'stress' && app.stressReady) {
+    const now = performance.now();
+    app.currentShift = { x: 23 * Math.sin(now * .0005), y: 17 * Math.cos(now * .00065) };
+    requestStressQuery();
+    queuePaint();
+  }
+  requestAnimationFrame(animationFrame);
+}
+function downloadText(filename, text, mime = 'text/plain;charset=utf-8') {
+  const url = URL.createObjectURL(new Blob([text], { type: mime }));
+  const anchor = document.createElement('a');
+  anchor.href = url; anchor.download = filename; anchor.click();
+  setTimeout(() => URL.revokeObjectURL(url), 400);
+}
+function chartSvg(rows, metric, title) {
+  const W = 580, H = 275, L = 72, R = 17, T = 18, B = 48;
+  const innerW = W - L - R, innerH = H - T - B;
+  const values = rows.map((row) => row[metric]);
+  const maxY = Math.max(0.000001, ...values) * 1.12;
+  const depths = [...new Set(rows.map((r) => r.depth))].sort((a, b) => a - b);
+  const x = (depth) => L + innerW * depths.indexOf(depth) / Math.max(1, depths.length - 1);
+  const y = (v) => T + innerH * (1 - v / maxY);
+  const colors = ['#2863bd', '#13996f', '#c08735', '#9a57a5'];
+  let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${title}" xmlns="http://www.w3.org/2000/svg">`;
+  for (let k = 0; k <= 4; k++) {
+    const value = maxY * k / 4;
+    const Y = y(value);
+    svg += `<line x1="${L}" y1="${Y}" x2="${W - R}" y2="${Y}" stroke="#ebeff4"/><text x="${L - 8}" y="${Y + 4}" text-anchor="end" font-size="11" fill="#718097">${nfmt(value, metric === 'meanCandidates' ? 0 : 2)}</text>`;
+  }
+  for (const depth of depths) svg += `<text x="${x(depth)}" y="${H - B + 19}" text-anchor="middle" font-size="12" fill="#718097">${depth}</text>`;
+  svg += `<text x="${W / 2}" y="${H - 5}" text-anchor="middle" font-size="11" fill="#647287">Глубина дерева (0 = полный перебор)</text>`;
+  const densities = [...new Set(rows.map((r) => r.density))].sort((a, b) => a - b);
+  densities.forEach((density, index) => {
+    const series = rows.filter((row) => row.density === density).sort((a, b) => a.depth - b.depth);
+    const pts = series.map((r) => `${x(r.depth)},${y(r[metric])}`).join(' ');
+    svg += `<polyline fill="none" stroke="${colors[index]}" stroke-width="2.5" points="${pts}"/>`;
+    for (const point of series) svg += `<circle r="4" fill="${colors[index]}" cx="${x(point.depth)}" cy="${y(point[metric])}"><title>${density}×, глубина ${point.depth}: ${nfmt(point[metric], 3)}</title></circle>`;
+  });
+  svg += '</svg><div class="chart-legend">' + densities.map((density, i) => `<span><i style="background:${colors[i]}"></i> Плотность ${density}×</span>`).join('') + '</div>';
+  return svg;
+}
+function showBenchmark(result) {
+  app.benchmark = result;
+  $('benchmark-empty').hidden = true;
+  $('benchmark-content').hidden = false;
+  $('chart-depth').innerHTML = chartSvg(result.results, 'medianMs', 'Время отсечения');
+  $('chart-candidates').innerHTML = chartSvg(result.results, 'meanCandidates', 'Число кандидатов');
+  $('benchmark-table').innerHTML = result.results.map((row) => `<tr><td>${row.density}×</td><td>${row.depth}</td><td>${nfmt(row.buildMs, 2)}</td><td>${nfmt(row.medianMs, 3)}</td><td>${nfmt(row.p95Ms, 3)}</td><td>${nfmt(row.meanCandidates, 0)}</td><td>${nfmt(row.nodes, 0)}</td></tr>`).join('');
+}
+function startBenchmark() {
+  if (app.benchmarkBusy) return;
+  app.benchmarkBusy = true;
+  $('run-benchmark').disabled = true;
+  $('benchmark-progress').hidden = false;
+  const worker = makeWorker();
+  app.benchWorker = worker;
+  worker.onmessage = ({ data: message }) => {
+    if (message.kind === 'progress') {
+      const { done, total, density, depth } = message.info;
+      $('benchmark-progress-value').textContent = `${Math.round(done * 100 / total)}%`;
+      $('benchmark-progress-fill').style.width = `${done * 100 / total}%`;
+      $('benchmark-progress-text').textContent = `Плотность ${density}×, глубина ${depth} · ${done}/${total}`;
+    } else if (message.kind === 'benchmarkResult') {
+      app.benchmarkBusy = false;
+      $('run-benchmark').disabled = false;
+      $('benchmark-progress').hidden = true;
+      showBenchmark(message.result);
+      worker.terminate();
+    } else if (message.kind === 'error') {
+      app.benchmarkBusy = false;
+      $('run-benchmark').disabled = false;
+      $('benchmark-progress-text').textContent = message.message;
+      worker.terminate();
+    }
+  };
+  worker.onerror = (e) => { app.benchmarkBusy = false; $('run-benchmark').disabled = false; $('benchmark-progress-text').textContent = e.message; worker.terminate(); };
+  worker.postMessage({ kind: 'benchmark', options: { count: 500000, depths: [0, 4, 6, 8], densities: [0.6, 1, 3], samples: 16, seed: 2026 } });
+}
+function checks() {
+  const tests = [];
+  const sampleRect = rect(-5, -5, 5, 5);
+  const assert = (name, predicate) => { try { tests.push({ name, ok: !!predicate() }); } catch (e) { tests.push({ name, ok: false, error: e.message }); } };
+  const eq = (a, b) => equivalentSegments(a, b);
+  assert('Отрезок на верхней границе окна', () => eq(clipCohen(-5,5,5,5,sampleRect), [-5,5,5,5]) && eq(clipLiang(-5,5,5,5,sampleRect), [-5,5,5,5]));
+  assert('Отрезок на вертикальной границе', () => eq(clipCohen(5,-5,5,5,sampleRect), [5,-5,5,5]));
+  assert('Нулевая длина точно в вершине окна', () => eq(clipCohen(-5,-5,-5,-5,sampleRect), [-5,-5,-5,-5]) && eq(clipLiang(-5,-5,-5,-5,sampleRect), [-5,-5,-5,-5]));
+  assert('Параллельный отрезок вне окна', () => clipCohen(-6,6,6,6,sampleRect) === null && clipLiang(-6,6,6,6,sampleRect) === null);
+  assert('Пересечение диагонали в двух вершинах окна', () => eq(clipCohen(-9,-9,9,9,sampleRect), [-5,-5,5,5]) && eq(clipLiang(-9,-9,9,9,sampleRect), [-5,-5,5,5]));
+  assert('AABB: исключение без точного отсечения', () => aabbMask(-10,6,10,7,sampleRect) !== 0);
+  assert('ε-проверка при расхождении на половину ε', () => near(5,5+EPS/2) && outcode(5+EPS/2,0,sampleRect) === 0);
+  assert('Вогнутый полигон распадается на две части', () => clipPolygon(parseRings(polyPresets.split), rectangleRing(sampleRect)).length === 2);
+  assert('Вложенный контур создаёт отверстие', () => clipPolygon(parseRings(polyPresets.hole), rectangleRing(sampleRect)).some((r) => polygonArea(r) < 0));
+  assert('Самопересечение разрешается в несколько контуров', () => clipPolygon(parseRings(polyPresets.bowtie), rectangleRing(sampleRect)).length === 2);
+  assert('Рёбра через вершины отсекателя', () => clipPolygon([rectangleRing(sampleRect)], rectangleRing(sampleRect)).length === 1);
+  assert('Вариант 10: Сайрус–Бек для выпуклого ромба', () => {
+    const diamond = parseRings(convexPresets.diamond)[0];
+    return equivalentSegments(clipCyrusBeck(-20, 0, 20, 0, diamond), [-14,0,14,0]);
+  });
+  assert('Сайрус–Бек принимает оба направления обхода', () => {
+    const diamond = parseRings(convexPresets.diamond)[0];
+    return equivalentSegments(clipCyrusBeck(-20, 0, 20, 0, [...diamond].reverse()), [-14,0,14,0]);
+  });
+  assert('Сайрус–Бек отклоняет невыпуклый отсекатель', () => {
+    try { convexOrientation(parseRings('0 0\n5 0\n2 2\n5 5\n0 5')[0]); return false; }
+    catch (_) { return true; }
+  });
+  assert('Тонкий полигон не исчезает (ширина 10⁻⁶)', () => {
+    const w = 1e-6;
+    const ring = [{x:0,y:-3},{x:w,y:-3},{x:w,y:3},{x:0,y:3}];
+    const result = clipPolygon([ring],rectangleRing(sampleRect));
+    return result.length === 1 && near(result.reduce((a,b)=>a+polygonArea(b),0),6e-6,1e-9);
+  });
+  assert('Алгоритмы согласованы в ε-окрестности границы', () => {
+    const line = [5.00000005,0,5.000001,-5];
+    return equivalentSegments(clipCohen(...line,sampleRect),clipLiang(...line,sampleRect));
+  });
+  assert('Координаты данных хранятся в Float64Array', () => makeDataset(10) instanceof Float64Array);
+  assert('Quadtree при независимом движении совпадает с полным перебором', () => {
+    const data = makeDataset(3500, 3, 55);
+    const tree = new Quadtree(data, DATA_BOUNDS, {maxDepth:6});
+    const options = {motionTime:123456,motionAmplitude:3,maxVisible:0};
+    return scanSegments(data,sampleRect,'cohen',{tree,...options}).visible ===
+      scanSegments(data,sampleRect,'cohen',options).visible;
+  });
+  assert('Quadtree эквивалентен полному перебору', () => {
+    const data = makeDataset(3500, 1, 44);
+    const tree = new Quadtree(data, DATA_BOUNDS, { maxDepth: 6 });
+    return scanSegments(data, sampleRect, 'liang', { tree }).visible === scanSegments(data, sampleRect, 'liang').visible;
+  });
+  assert('Коэн и Лианг дают одинаковое число видимых', () => compareAlgorithms(makeDataset(3500,1,11), sampleRect).mismatch === 0);
+  $('check-results').innerHTML = tests.map((test) => `<div class="check-item ${test.ok ? '' : 'fail'}"><span>${test.name}${test.error ? ': ' + test.error : ''}</span><strong>${test.ok ? 'ПРОЙДЕНО' : 'ОШИБКА'}</strong></div>`).join('');
+  const passed = tests.filter((t) => t.ok).length;
+  $('check-summary').textContent = `Выполнено ${tests.length} проверок · успешно ${passed} · ошибок ${tests.length - passed}.`;
+}
+function wire() {
+  $all('.nav-item').forEach((button) => button.addEventListener('click', () => {
+    const name = button.dataset.tab;
+    $all('.nav-item').forEach((item) => item.classList.toggle('active', item === button));
+    $all('.panel').forEach((panel) => panel.classList.toggle('active', panel.id === `panel-${name}`));
+    if (name === 'demo') { frameCanvas(); requestStressQuery(); }
+  }));
+  $('mode').addEventListener('change', showMode);
+  $('algorithm').addEventListener('change', () => { app.algorithm = $('algorithm').value; recomputeSmall(); });
+  $all('[data-line-preset]').forEach((button) => button.addEventListener('click', () => {
+    app.segments = linePresets[button.dataset.linePreset].map((s) => [...s]); writeSegmentRows(); clearError(); recomputeSmall();
+  }));
+  $all('[data-convex-preset]').forEach((button) => button.addEventListener('click', () => {
+    const clip = parseRings(convexPresets[button.dataset.convexPreset])[0];
+    app.convexSign = convexOrientation(clip); app.convexClip = clip; writeConvexRows(); clearError(); recomputeSmall();
+  }));
+  $('apply-convex').addEventListener('click', () => {
+    try {
+      const rings = parseRings($('convex-input').value);
+      if (rings.length !== 1) throw new Error('У выпуклого отсекателя должен быть один замкнутый контур.');
+      const sign = convexOrientation(rings[0]);
+      app.convexClip = rings[0]; app.convexSign = sign; clearError(); recomputeSmall();
+    } catch (e) { showError(e); }
+  });
+  $all('[data-poly-preset]').forEach((button) => button.addEventListener('click', () => {
+    $('polygon-input').value = polyPresets[button.dataset.polyPreset];
+    app.polygon = parseRings($('polygon-input').value); clearError(); recomputeSmall();
+  }));
+  $('apply-segments').addEventListener('click', () => {
+    try { app.segments = parseSegmentRows($('segments-input').value); clearError(); recomputeSmall(); }
+    catch (e) { showError(e); }
+  });
+  $('apply-polygon').addEventListener('click', () => {
+    try { app.polygon = parseRings($('polygon-input').value); clearError(); recomputeSmall(); }
+    catch (e) { showError(e); }
+  });
+  $('file-input').addEventListener('change', async (event) => {
+    const file = event.target.files[0]; if (!file) return;
+    try {
+      const parsed = parseSegments(await file.text());
+      if (parsed.segments.length > 30000) throw new Error('Для визуального ручного режима файл должен содержать не более 30 000 отрезков; для 500 000 используйте потоковый режим.');
+      app.segments = parsed.segments; app.window = parsed.window;
+      $('mode').value = 'segments'; showMode(); syncWindow(); writeSegmentRows(); clearError(); resetCamera(); recomputeSmall();
+    } catch (e) { showError(e); } finally { event.target.value = ''; }
+  });
+  $('export-txt').addEventListener('click', () => downloadText('segments_lab5.txt', serializeSegments(app.segments, app.window)));
+  $('export-png').addEventListener('click', () => {
+    if (app.mode === 'stress' && app.gpu) app.gpu.draw(app.camera, app.width, app.height, app.pixelRatio, app.window, app.currentShift);
+    const image = document.createElement('canvas');
+    image.width = canvas.width; image.height = canvas.height;
+    const layer = image.getContext('2d');
+    layer.fillStyle = '#ffffff'; layer.fillRect(0, 0, image.width, image.height);
+    if (app.mode === 'stress') layer.drawImage(stressCanvas, 0, 0);
+    layer.drawImage(canvas, 0, 0);
+    image.toBlob((blob) => {
+    if (!blob) return; const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'cliplab_view.png'; a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 400);
+    });
+  });
+  $('apply-window').addEventListener('click', applyWindow);
+  ['xmin', 'ymin', 'xmax', 'ymax'].forEach((id) => $(id).addEventListener('keydown', (event) => { if (event.key === 'Enter') applyWindow(); }));
+  $('zoom-in').addEventListener('click', () => scaleAt(1.25));
+  $('zoom-out').addEventListener('click', () => scaleAt(.8));
+  $('reset-camera').addEventListener('click', resetCamera);
+  ['show-grid', 'show-axes', 'show-original'].forEach((id) => $(id).addEventListener('change', queuePaint));
+  $('compare').addEventListener('click', runComparison);
+  $('build-tree').addEventListener('click', createStressData);
+  $('stress-compare').addEventListener('click', runComparison);
+  $('animate-stress').addEventListener('change', () => {
+    app.animation = $('animate-stress').checked;
+    app.frameTimes = []; app.lastResultTime = 0; app.renderFrameTimes = []; app.lastPaintAt = 0;
+    $('fps-label').textContent = app.animation ? 'Рендер: измерение...' : '— FPS';
+    $('query-fps-label').textContent = 'Точное отсечение: —';
+    if (!app.animation) { app.currentShift = { x:0,y:0 }; requestStressQuery(); queuePaint(); }
+  });
+  $('independent-motion').addEventListener('change', requestStressQuery);
+  $('run-benchmark').addEventListener('click', startBenchmark);
+  $('export-json').addEventListener('click', () => { if (app.benchmark) downloadText('lab5-benchmark.json', JSON.stringify(app.benchmark, null, 2), 'application/json'); });
+  $('export-csv').addEventListener('click', () => {
+    if (!app.benchmark) return;
+    const fields = ['count', 'density', 'depth', 'buildMs', 'medianMs', 'p95Ms', 'meanCandidates', 'meanVisible', 'nodes', 'samples'];
+    downloadText('lab5-benchmark.csv', [fields.join(','), ...app.benchmark.results.map((r) => fields.map((f) => r[f]).join(','))].join('\n'), 'text/csv');
+  });
+  $('run-checks').addEventListener('click', checks);
+  new ResizeObserver(frameCanvas).observe($('geometry-viewport'));
+}
+app.convexSign = convexOrientation(app.convexClip);
+writeConvexRows();
+writeSegmentRows();
+$('polygon-input').value = polyPresets.concave;
+wire();
+recomputeSmall();
+frameCanvas();
+requestAnimationFrame(animationFrame);
+
+})();</script>
+</body>
+</html>
